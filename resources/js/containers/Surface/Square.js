@@ -1,55 +1,49 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
+import Radium from "radium";
 
 class Square extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            style: {
                 backgroundColor: "black",
                 border: "0px solid white ",
-                width: "100px",
-                height: "100px",
-            },
+                width: "15px",
+                height: "15px",
+                cursor: "url(/images/one.png), pointer",
+                backgroundSize: "cover",
+                borderRadius: "20%",
+          
             }
         };
-    
+
     hoover() {
-        const style = {
-            backgroundColor: "black",
-            border: "2px solid white ",
-            width: "100px",
-            height: "100px",
-            boxShadow: "15px 15px white"
-        }
         this.setState({
-            style: style,
+            backgroundColor: '#'+Math.floor((this.props.number)*16777215).toString(16),
         })
     
     }
     hooverOut() {
-        const style = {
-            backgroundColor: "black",
-            border: "0px solid white ",
-            width: "100px",
-            height: "100px"
-        }
+  
         this.setState({
-            style: style,
+            backgroundColor: '#'+Math.floor((this.props.number-this.props.index*0.0000016)*16777215).toString(16),
         })
     
     }
     render() {
- 
+
         return (
             <React.Fragment>
-                <div style={this.state.style}
+                <div style={this.state}
                  onMouseOver={() => this.hoover()}
+                 onTouchStart={() => this.hoover()}
+                 onTouchMove={() => this.hoover()}
                  onMouseOut={() => this.hooverOut()}
+                 onTouchEnd={() => this.hooverOut()}
                  ></div>
             </React.Fragment>
         );
     }
 }
 
-export default Square;
+export default Radium(Square);

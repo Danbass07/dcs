@@ -13,3 +13,5 @@ require('./bootstrap');
  */
 
 require('./containers/Surface/Surface');
+require('./containers/Surface/Surface2');
+require('./containers/OurGroup/AppBrain');
