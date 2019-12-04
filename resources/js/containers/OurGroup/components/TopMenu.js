@@ -3,6 +3,7 @@ import styled from "styled-components";
 
 const TopMenu = props => {
     const MainWrapper = styled.div`
+    display:none;
         height: 400px;
         width: 400px;
         background-color: ${props.theme.colorOne};

@@ -7,7 +7,7 @@
             <div class="card">
                 <div class="card-header">My Project Number One</div>
                 <!-- <div id="surface2"></div> -->
-                <div id="AppBrain"></div>
+       
                 <div class="card-body">
                     @if (session('status'))
                         <div class="alert alert-success" role="alert">
