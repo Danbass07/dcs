@@ -44,7 +44,6 @@ class AppBody extends Component {
 
 
     changeTheme(themeNumber) {
-        console.log(' change');
         this.setState({
             themeActive: themeNumber,
         })
@@ -54,6 +53,8 @@ class AppBody extends Component {
         height: 100%;
         width: 100%;
         background-color: black;
+        min-width:  425px;
+        overflow: hidden;
     `;
 
         const TopSection = styled.div`
@@ -63,17 +64,15 @@ class AppBody extends Component {
         grid-template-columns: repeat(5, 1fr);
         grid-template-rows: repeat(2, 1fr);
         grid-column-gap: 0px;
-        grid-row-gap: 0px;
-       
+        grid-row-gap: 0px; 
     `;
         const MiddleSection = styled.div`
-        height: 400px;
+        height:80%;
         width: 1280px;
         position: relative;
         display: flex;
         flex-direction: row;
         left: -380px;
-    
     `;
 
         return (

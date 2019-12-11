@@ -71975,7 +71975,7 @@ __webpack_require__.r(__webpack_exports__);
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _templateObject3() {
-  var data = _taggedTemplateLiteral(["\n        height: 400px;\n        width: 1280px;\n        position: relative;\n        display: flex;\n        flex-direction: row;\n        left: -380px;\n    \n    "]);
+  var data = _taggedTemplateLiteral(["\n        height:80%;\n        width: 1280px;\n        position: relative;\n        display: flex;\n        flex-direction: row;\n        left: -380px;\n    "]);
 
   _templateObject3 = function _templateObject3() {
     return data;
@@ -71985,7 +71985,7 @@ function _templateObject3() {
 }
 
 function _templateObject2() {
-  var data = _taggedTemplateLiteral(["\n        height: 160px;\n        width: 100%;\n        display: grid;\n        grid-template-columns: repeat(5, 1fr);\n        grid-template-rows: repeat(2, 1fr);\n        grid-column-gap: 0px;\n        grid-row-gap: 0px;\n       \n    "]);
+  var data = _taggedTemplateLiteral(["\n        height: 160px;\n        width: 100%;\n        display: grid;\n        grid-template-columns: repeat(5, 1fr);\n        grid-template-rows: repeat(2, 1fr);\n        grid-column-gap: 0px;\n        grid-row-gap: 0px; \n    "]);
 
   _templateObject2 = function _templateObject2() {
     return data;
@@ -71995,7 +71995,7 @@ function _templateObject2() {
 }
 
 function _templateObject() {
-  var data = _taggedTemplateLiteral(["\n        height: 100%;\n        width: 100%;\n        background-color: black;\n    "]);
+  var data = _taggedTemplateLiteral(["\n        height: 100%;\n        width: 100%;\n        background-color: black;\n        min-width:  425px;\n        overflow: hidden;\n    "]);
 
   _templateObject = function _templateObject() {
     return data;
@@ -72072,7 +72072,6 @@ function (_Component) {
   _createClass(AppBody, [{
     key: "changeTheme",
     value: function changeTheme(themeNumber) {
-      console.log(' change');
       this.setState({
         themeActive: themeNumber
       });
