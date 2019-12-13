@@ -11356,3 +11356,10 @@ a.text-dark:focus {
   }
 }
 
+.appScreen {
+  max-width: 450px;
+  max-height: 600px;
+  margin: auto auto;
+  overflow: hidden;
+}
+

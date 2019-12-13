@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useState }  from "react";
 import styled from "styled-components";
 
-const TopMenu = props => {
+const TopMenu = React.memo(props => {
+    let [setComponentStatus, newComponentStatus] = useState({
+        active: true, 
+    })
     const MainWrapper = styled.div`
-    display:none;
         height: 400px;
-        width: 400px;
-        background-color: ${props.theme.colorOne};
+        width: 100%;
+        background-color: ${props.theme.colorThree};
         border: 4px ridge ${props.theme.colorTwo};
         color:${props.theme.colorFive};
         margin: auto auto;
@@ -14,10 +16,13 @@ const TopMenu = props => {
         position:relative;
         top: -380px;
         margin-bottom: -380px;
+        text-align: bottom;
+        transform: ${!setComponentStatus ? 'translateY(100%);' : 'translateY(0);'}
     `;
-    return <MainWrapper>
+    return <MainWrapper
+    onClick={() => newComponentStatus(!setComponentStatus)}>
        TopMenu
     </MainWrapper>;
-};
+});
 
 export default TopMenu;

@@ -68265,7 +68265,7 @@ exports.unstable_unsubscribe = unstable_unsubscribe;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/** @license React v0.18.0
+/* WEBPACK VAR INJECTION */(function(global) {/** @license React v0.13.6
  * scheduler.development.js
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -68285,662 +68285,219 @@ if (true) {
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var enableSchedulerDebugging = false;
-var enableIsInputPending = false;
-var enableProfiling = true;
 
-var requestHostCallback;
-
-var requestHostTimeout;
-var cancelHostTimeout;
-var shouldYieldToHost;
-var requestPaint;
-
-
-
-if ( // If Scheduler runs in a non-DOM environment, it falls back to a naive
-// implementation using setTimeout.
-typeof window === 'undefined' || // Check if MessageChannel is supported, too.
-typeof MessageChannel !== 'function') {
-  // If this accidentally gets imported in a non-browser environment, e.g. JavaScriptCore,
-  // fallback to a naive implementation.
-  var _callback = null;
-  var _timeoutID = null;
-
-  var _flushCallback = function () {
-    if (_callback !== null) {
-      try {
-        var currentTime = exports.unstable_now();
-        var hasRemainingTime = true;
-
-        _callback(hasRemainingTime, currentTime);
-
-        _callback = null;
-      } catch (e) {
-        setTimeout(_flushCallback, 0);
-        throw e;
-      }
-    }
-  };
-
-  var initialTime = Date.now();
-
-  exports.unstable_now = function () {
-    return Date.now() - initialTime;
-  };
-
-  requestHostCallback = function (cb) {
-    if (_callback !== null) {
-      // Protect against re-entrancy.
-      setTimeout(requestHostCallback, 0, cb);
-    } else {
-      _callback = cb;
-      setTimeout(_flushCallback, 0);
-    }
-  };
-
-  requestHostTimeout = function (cb, ms) {
-    _timeoutID = setTimeout(cb, ms);
-  };
-
-  cancelHostTimeout = function () {
-    clearTimeout(_timeoutID);
-  };
-
-  shouldYieldToHost = function () {
-    return false;
-  };
-
-  requestPaint = exports.unstable_forceFrameRate = function () {};
-} else {
-  // Capture local references to native APIs, in case a polyfill overrides them.
-  var performance = window.performance;
-  var _Date = window.Date;
-  var _setTimeout = window.setTimeout;
-  var _clearTimeout = window.clearTimeout;
-
-  if (typeof console !== 'undefined') {
-    // TODO: Scheduler no longer requires these methods to be polyfilled. But
-    // maybe we want to continue warning if they don't exist, to preserve the
-    // option to rely on it in the future?
-    var requestAnimationFrame = window.requestAnimationFrame;
-    var cancelAnimationFrame = window.cancelAnimationFrame; // TODO: Remove fb.me link
-
-    if (typeof requestAnimationFrame !== 'function') {
-      console.error("This browser doesn't support requestAnimationFrame. " + 'Make sure that you load a ' + 'polyfill in older browsers. https://fb.me/react-polyfills');
-    }
-
-    if (typeof cancelAnimationFrame !== 'function') {
-      console.error("This browser doesn't support cancelAnimationFrame. " + 'Make sure that you load a ' + 'polyfill in older browsers. https://fb.me/react-polyfills');
-    }
-  }
-
-  if (typeof performance === 'object' && typeof performance.now === 'function') {
-    exports.unstable_now = function () {
-      return performance.now();
-    };
-  } else {
-    var _initialTime = _Date.now();
-
-    exports.unstable_now = function () {
-      return _Date.now() - _initialTime;
-    };
-  }
-
-  var isMessageLoopRunning = false;
-  var scheduledHostCallback = null;
-  var taskTimeoutID = -1; // Scheduler periodically yields in case there is other work on the main
-  // thread, like user events. By default, it yields multiple times per frame.
-  // It does not attempt to align with frame boundaries, since most tasks don't
-  // need to be frame aligned; for those that do, use requestAnimationFrame.
-
-  var yieldInterval = 5;
-  var deadline = 0; // TODO: Make this configurable
-  // TODO: Adjust this based on priority?
-
-  var maxYieldInterval = 300;
-  var needsPaint = false;
-
-  if (enableIsInputPending && navigator !== undefined && navigator.scheduling !== undefined && navigator.scheduling.isInputPending !== undefined) {
-    var scheduling = navigator.scheduling;
-
-    shouldYieldToHost = function () {
-      var currentTime = exports.unstable_now();
-
-      if (currentTime >= deadline) {
-        // There's no time left. We may want to yield control of the main
-        // thread, so the browser can perform high priority tasks. The main ones
-        // are painting and user input. If there's a pending paint or a pending
-        // input, then we should yield. But if there's neither, then we can
-        // yield less often while remaining responsive. We'll eventually yield
-        // regardless, since there could be a pending paint that wasn't
-        // accompanied by a call to `requestPaint`, or other main thread tasks
-        // like network events.
-        if (needsPaint || scheduling.isInputPending()) {
-          // There is either a pending paint or a pending input.
-          return true;
-        } // There's no pending input. Only yield if we've reached the max
-        // yield interval.
-
-
-        return currentTime >= maxYieldInterval;
-      } else {
-        // There's still time left in the frame.
-        return false;
-      }
-    };
-
-    requestPaint = function () {
-      needsPaint = true;
-    };
-  } else {
-    // `isInputPending` is not available. Since we have no way of knowing if
-    // there's pending input, always yield at the end of the frame.
-    shouldYieldToHost = function () {
-      return exports.unstable_now() >= deadline;
-    }; // Since we yield every frame regardless, `requestPaint` has no effect.
-
-
-    requestPaint = function () {};
-  }
-
-  exports.unstable_forceFrameRate = function (fps) {
-    if (fps < 0 || fps > 125) {
-      console.error('forceFrameRate takes a positive int between 0 and 125, ' + 'forcing framerates higher than 125 fps is not unsupported');
-      return;
-    }
-
-    if (fps > 0) {
-      yieldInterval = Math.floor(1000 / fps);
-    } else {
-      // reset the framerate
-      yieldInterval = 5;
-    }
-  };
-
-  var performWorkUntilDeadline = function () {
-    if (scheduledHostCallback !== null) {
-      var currentTime = exports.unstable_now(); // Yield after `yieldInterval` ms, regardless of where we are in the vsync
-      // cycle. This means there's always time remaining at the beginning of
-      // the message event.
-
-      deadline = currentTime + yieldInterval;
-      var hasTimeRemaining = true;
-
-      try {
-        var hasMoreWork = scheduledHostCallback(hasTimeRemaining, currentTime);
-
-        if (!hasMoreWork) {
-          isMessageLoopRunning = false;
-          scheduledHostCallback = null;
-        } else {
-          // If there's more work, schedule the next message event at the end
-          // of the preceding one.
-          port.postMessage(null);
-        }
-      } catch (error) {
-        // If a scheduler task throws, exit the current browser task so the
-        // error can be observed.
-        port.postMessage(null);
-        throw error;
-      }
-    } else {
-      isMessageLoopRunning = false;
-    } // Yielding to the browser will give it a chance to paint, so we can
-    // reset this.
-
-
-    needsPaint = false;
-  };
-
-  var channel = new MessageChannel();
-  var port = channel.port2;
-  channel.port1.onmessage = performWorkUntilDeadline;
-
-  requestHostCallback = function (callback) {
-    scheduledHostCallback = callback;
-
-    if (!isMessageLoopRunning) {
-      isMessageLoopRunning = true;
-      port.postMessage(null);
-    }
-  };
-
-  requestHostTimeout = function (callback, ms) {
-    taskTimeoutID = _setTimeout(function () {
-      callback(exports.unstable_now());
-    }, ms);
-  };
-
-  cancelHostTimeout = function () {
-    _clearTimeout(taskTimeoutID);
-
-    taskTimeoutID = -1;
-  };
-}
-
-function push(heap, node) {
-  var index = heap.length;
-  heap.push(node);
-  siftUp(heap, node, index);
-}
-function peek(heap) {
-  var first = heap[0];
-  return first === undefined ? null : first;
-}
-function pop(heap) {
-  var first = heap[0];
-
-  if (first !== undefined) {
-    var last = heap.pop();
-
-    if (last !== first) {
-      heap[0] = last;
-      siftDown(heap, last, 0);
-    }
-
-    return first;
-  } else {
-    return null;
-  }
-}
-
-function siftUp(heap, node, i) {
-  var index = i;
-
-  while (true) {
-    var parentIndex = Math.floor((index - 1) / 2);
-    var parent = heap[parentIndex];
-
-    if (parent !== undefined && compare(parent, node) > 0) {
-      // The parent is larger. Swap positions.
-      heap[parentIndex] = node;
-      heap[index] = parent;
-      index = parentIndex;
-    } else {
-      // The parent is smaller. Exit.
-      return;
-    }
-  }
-}
-
-function siftDown(heap, node, i) {
-  var index = i;
-  var length = heap.length;
-
-  while (index < length) {
-    var leftIndex = (index + 1) * 2 - 1;
-    var left = heap[leftIndex];
-    var rightIndex = leftIndex + 1;
-    var right = heap[rightIndex]; // If the left or right node is smaller, swap with the smaller of those.
-
-    if (left !== undefined && compare(left, node) < 0) {
-      if (right !== undefined && compare(right, left) < 0) {
-        heap[index] = right;
-        heap[rightIndex] = node;
-        index = rightIndex;
-      } else {
-        heap[index] = left;
-        heap[leftIndex] = node;
-        index = leftIndex;
-      }
-    } else if (right !== undefined && compare(right, node) < 0) {
-      heap[index] = right;
-      heap[rightIndex] = node;
-      index = rightIndex;
-    } else {
-      // Neither child is smaller. Exit.
-      return;
-    }
-  }
-}
-
-function compare(a, b) {
-  // Compare sort index first, then task id.
-  var diff = a.sortIndex - b.sortIndex;
-  return diff !== 0 ? diff : a.id - b.id;
-}
+/* eslint-disable no-var */
 
 // TODO: Use symbols?
-var NoPriority = 0;
 var ImmediatePriority = 1;
 var UserBlockingPriority = 2;
 var NormalPriority = 3;
 var LowPriority = 4;
 var IdlePriority = 5;
 
-var runIdCounter = 0;
-var mainThreadIdCounter = 0;
-var profilingStateSize = 4;
-var sharedProfilingBuffer = enableProfiling ? // $FlowFixMe Flow doesn't know about SharedArrayBuffer
-typeof SharedArrayBuffer === 'function' ? new SharedArrayBuffer(profilingStateSize * Int32Array.BYTES_PER_ELEMENT) : // $FlowFixMe Flow doesn't know about ArrayBuffer
-typeof ArrayBuffer === 'function' ? new ArrayBuffer(profilingStateSize * Int32Array.BYTES_PER_ELEMENT) : null // Don't crash the init path on IE9
-: null;
-var profilingState = enableProfiling && sharedProfilingBuffer !== null ? new Int32Array(sharedProfilingBuffer) : []; // We can't read this but it helps save bytes for null checks
-
-var PRIORITY = 0;
-var CURRENT_TASK_ID = 1;
-var CURRENT_RUN_ID = 2;
-var QUEUE_SIZE = 3;
-
-if (enableProfiling) {
-  profilingState[PRIORITY] = NoPriority; // This is maintained with a counter, because the size of the priority queue
-  // array might include canceled tasks.
-
-  profilingState[QUEUE_SIZE] = 0;
-  profilingState[CURRENT_TASK_ID] = 0;
-} // Bytes per element is 4
-
-
-var INITIAL_EVENT_LOG_SIZE = 131072;
-var MAX_EVENT_LOG_SIZE = 524288; // Equivalent to 2 megabytes
-
-var eventLogSize = 0;
-var eventLogBuffer = null;
-var eventLog = null;
-var eventLogIndex = 0;
-var TaskStartEvent = 1;
-var TaskCompleteEvent = 2;
-var TaskErrorEvent = 3;
-var TaskCancelEvent = 4;
-var TaskRunEvent = 5;
-var TaskYieldEvent = 6;
-var SchedulerSuspendEvent = 7;
-var SchedulerResumeEvent = 8;
-
-function logEvent(entries) {
-  if (eventLog !== null) {
-    var offset = eventLogIndex;
-    eventLogIndex += entries.length;
-
-    if (eventLogIndex + 1 > eventLogSize) {
-      eventLogSize *= 2;
-
-      if (eventLogSize > MAX_EVENT_LOG_SIZE) {
-        console.error("Scheduler Profiling: Event log exceeded maximum size. Don't " + 'forget to call `stopLoggingProfilingEvents()`.');
-        stopLoggingProfilingEvents();
-        return;
-      }
-
-      var newEventLog = new Int32Array(eventLogSize * 4);
-      newEventLog.set(eventLog);
-      eventLogBuffer = newEventLog.buffer;
-      eventLog = newEventLog;
-    }
-
-    eventLog.set(entries, offset);
-  }
-}
-
-function startLoggingProfilingEvents() {
-  eventLogSize = INITIAL_EVENT_LOG_SIZE;
-  eventLogBuffer = new ArrayBuffer(eventLogSize * 4);
-  eventLog = new Int32Array(eventLogBuffer);
-  eventLogIndex = 0;
-}
-function stopLoggingProfilingEvents() {
-  var buffer = eventLogBuffer;
-  eventLogSize = 0;
-  eventLogBuffer = null;
-  eventLog = null;
-  eventLogIndex = 0;
-  return buffer;
-}
-function markTaskStart(task, ms) {
-  if (enableProfiling) {
-    profilingState[QUEUE_SIZE]++;
-
-    if (eventLog !== null) {
-      // performance.now returns a float, representing milliseconds. When the
-      // event is logged, it's coerced to an int. Convert to microseconds to
-      // maintain extra degrees of precision.
-      logEvent([TaskStartEvent, ms * 1000, task.id, task.priorityLevel]);
-    }
-  }
-}
-function markTaskCompleted(task, ms) {
-  if (enableProfiling) {
-    profilingState[PRIORITY] = NoPriority;
-    profilingState[CURRENT_TASK_ID] = 0;
-    profilingState[QUEUE_SIZE]--;
-
-    if (eventLog !== null) {
-      logEvent([TaskCompleteEvent, ms * 1000, task.id]);
-    }
-  }
-}
-function markTaskCanceled(task, ms) {
-  if (enableProfiling) {
-    profilingState[QUEUE_SIZE]--;
-
-    if (eventLog !== null) {
-      logEvent([TaskCancelEvent, ms * 1000, task.id]);
-    }
-  }
-}
-function markTaskErrored(task, ms) {
-  if (enableProfiling) {
-    profilingState[PRIORITY] = NoPriority;
-    profilingState[CURRENT_TASK_ID] = 0;
-    profilingState[QUEUE_SIZE]--;
-
-    if (eventLog !== null) {
-      logEvent([TaskErrorEvent, ms * 1000, task.id]);
-    }
-  }
-}
-function markTaskRun(task, ms) {
-  if (enableProfiling) {
-    runIdCounter++;
-    profilingState[PRIORITY] = task.priorityLevel;
-    profilingState[CURRENT_TASK_ID] = task.id;
-    profilingState[CURRENT_RUN_ID] = runIdCounter;
-
-    if (eventLog !== null) {
-      logEvent([TaskRunEvent, ms * 1000, task.id, runIdCounter]);
-    }
-  }
-}
-function markTaskYield(task, ms) {
-  if (enableProfiling) {
-    profilingState[PRIORITY] = NoPriority;
-    profilingState[CURRENT_TASK_ID] = 0;
-    profilingState[CURRENT_RUN_ID] = 0;
-
-    if (eventLog !== null) {
-      logEvent([TaskYieldEvent, ms * 1000, task.id, runIdCounter]);
-    }
-  }
-}
-function markSchedulerSuspended(ms) {
-  if (enableProfiling) {
-    mainThreadIdCounter++;
-
-    if (eventLog !== null) {
-      logEvent([SchedulerSuspendEvent, ms * 1000, mainThreadIdCounter]);
-    }
-  }
-}
-function markSchedulerUnsuspended(ms) {
-  if (enableProfiling) {
-    if (eventLog !== null) {
-      logEvent([SchedulerResumeEvent, ms * 1000, mainThreadIdCounter]);
-    }
-  }
-}
-
-/* eslint-disable no-var */
+// Max 31 bit integer. The max integer size in V8 for 32-bit systems.
 // Math.pow(2, 30) - 1
 // 0b111111111111111111111111111111
+var maxSigned31BitInt = 1073741823;
 
-var maxSigned31BitInt = 1073741823; // Times out immediately
-
-var IMMEDIATE_PRIORITY_TIMEOUT = -1; // Eventually times out
-
+// Times out immediately
+var IMMEDIATE_PRIORITY_TIMEOUT = -1;
+// Eventually times out
 var USER_BLOCKING_PRIORITY = 250;
 var NORMAL_PRIORITY_TIMEOUT = 5000;
-var LOW_PRIORITY_TIMEOUT = 10000; // Never times out
+var LOW_PRIORITY_TIMEOUT = 10000;
+// Never times out
+var IDLE_PRIORITY = maxSigned31BitInt;
 
-var IDLE_PRIORITY = maxSigned31BitInt; // Tasks are stored on a min heap
+// Callbacks are stored as a circular, doubly linked list.
+var firstCallbackNode = null;
 
-var taskQueue = [];
-var timerQueue = []; // Incrementing id counter. Used to maintain insertion order.
-
-var taskIdCounter = 1; // Pausing the scheduler is useful for debugging.
-
+var currentDidTimeout = false;
+// Pausing the scheduler is useful for debugging.
 var isSchedulerPaused = false;
-var currentTask = null;
-var currentPriorityLevel = NormalPriority; // This is set while performing work, to prevent re-entrancy.
 
-var isPerformingWork = false;
+var currentPriorityLevel = NormalPriority;
+var currentEventStartTime = -1;
+var currentExpirationTime = -1;
+
+// This is set when a callback is being executed, to prevent re-entrancy.
+var isExecutingCallback = false;
+
 var isHostCallbackScheduled = false;
-var isHostTimeoutScheduled = false;
 
-function advanceTimers(currentTime) {
-  // Check for tasks that are no longer delayed and add them to the queue.
-  var timer = peek(timerQueue);
+var hasNativePerformanceNow = typeof performance === 'object' && typeof performance.now === 'function';
 
-  while (timer !== null) {
-    if (timer.callback === null) {
-      // Timer was cancelled.
-      pop(timerQueue);
-    } else if (timer.startTime <= currentTime) {
-      // Timer fired. Transfer to the task queue.
-      pop(timerQueue);
-      timer.sortIndex = timer.expirationTime;
-      push(taskQueue, timer);
-
-      if (enableProfiling) {
-        markTaskStart(timer, currentTime);
-        timer.isQueued = true;
-      }
-    } else {
-      // Remaining timers are pending.
-      return;
-    }
-
-    timer = peek(timerQueue);
+function ensureHostCallbackIsScheduled() {
+  if (isExecutingCallback) {
+    // Don't schedule work yet; wait until the next time we yield.
+    return;
   }
-}
-
-function handleTimeout(currentTime) {
-  isHostTimeoutScheduled = false;
-  advanceTimers(currentTime);
-
+  // Schedule the host callback using the earliest expiration in the list.
+  var expirationTime = firstCallbackNode.expirationTime;
   if (!isHostCallbackScheduled) {
-    if (peek(taskQueue) !== null) {
-      isHostCallbackScheduled = true;
-      requestHostCallback(flushWork);
-    } else {
-      var firstTimer = peek(timerQueue);
+    isHostCallbackScheduled = true;
+  } else {
+    // Cancel the existing host callback.
+    cancelHostCallback();
+  }
+  requestHostCallback(flushWork, expirationTime);
+}
 
-      if (firstTimer !== null) {
-        requestHostTimeout(handleTimeout, firstTimer.startTime - currentTime);
+function flushFirstCallback() {
+  var flushedNode = firstCallbackNode;
+
+  // Remove the node from the list before calling the callback. That way the
+  // list is in a consistent state even if the callback throws.
+  var next = firstCallbackNode.next;
+  if (firstCallbackNode === next) {
+    // This is the last callback in the list.
+    firstCallbackNode = null;
+    next = null;
+  } else {
+    var lastCallbackNode = firstCallbackNode.previous;
+    firstCallbackNode = lastCallbackNode.next = next;
+    next.previous = lastCallbackNode;
+  }
+
+  flushedNode.next = flushedNode.previous = null;
+
+  // Now it's safe to call the callback.
+  var callback = flushedNode.callback;
+  var expirationTime = flushedNode.expirationTime;
+  var priorityLevel = flushedNode.priorityLevel;
+  var previousPriorityLevel = currentPriorityLevel;
+  var previousExpirationTime = currentExpirationTime;
+  currentPriorityLevel = priorityLevel;
+  currentExpirationTime = expirationTime;
+  var continuationCallback;
+  try {
+    continuationCallback = callback();
+  } finally {
+    currentPriorityLevel = previousPriorityLevel;
+    currentExpirationTime = previousExpirationTime;
+  }
+
+  // A callback may return a continuation. The continuation should be scheduled
+  // with the same priority and expiration as the just-finished callback.
+  if (typeof continuationCallback === 'function') {
+    var continuationNode = {
+      callback: continuationCallback,
+      priorityLevel: priorityLevel,
+      expirationTime: expirationTime,
+      next: null,
+      previous: null
+    };
+
+    // Insert the new callback into the list, sorted by its expiration. This is
+    // almost the same as the code in `scheduleCallback`, except the callback
+    // is inserted into the list *before* callbacks of equal expiration instead
+    // of after.
+    if (firstCallbackNode === null) {
+      // This is the first callback in the list.
+      firstCallbackNode = continuationNode.next = continuationNode.previous = continuationNode;
+    } else {
+      var nextAfterContinuation = null;
+      var node = firstCallbackNode;
+      do {
+        if (node.expirationTime >= expirationTime) {
+          // This callback expires at or after the continuation. We will insert
+          // the continuation *before* this callback.
+          nextAfterContinuation = node;
+          break;
+        }
+        node = node.next;
+      } while (node !== firstCallbackNode);
+
+      if (nextAfterContinuation === null) {
+        // No equal or lower priority callback was found, which means the new
+        // callback is the lowest priority callback in the list.
+        nextAfterContinuation = firstCallbackNode;
+      } else if (nextAfterContinuation === firstCallbackNode) {
+        // The new callback is the highest priority callback in the list.
+        firstCallbackNode = continuationNode;
+        ensureHostCallbackIsScheduled();
+      }
+
+      var previous = nextAfterContinuation.previous;
+      previous.next = nextAfterContinuation.previous = continuationNode;
+      continuationNode.next = nextAfterContinuation;
+      continuationNode.previous = previous;
+    }
+  }
+}
+
+function flushImmediateWork() {
+  if (
+  // Confirm we've exited the outer most event handler
+  currentEventStartTime === -1 && firstCallbackNode !== null && firstCallbackNode.priorityLevel === ImmediatePriority) {
+    isExecutingCallback = true;
+    try {
+      do {
+        flushFirstCallback();
+      } while (
+      // Keep flushing until there are no more immediate callbacks
+      firstCallbackNode !== null && firstCallbackNode.priorityLevel === ImmediatePriority);
+    } finally {
+      isExecutingCallback = false;
+      if (firstCallbackNode !== null) {
+        // There's still work remaining. Request another callback.
+        ensureHostCallbackIsScheduled();
+      } else {
+        isHostCallbackScheduled = false;
       }
     }
   }
 }
 
-function flushWork(hasTimeRemaining, initialTime) {
-  if (enableProfiling) {
-    markSchedulerUnsuspended(initialTime);
-  } // We'll need a host callback the next time work is scheduled.
+function flushWork(didTimeout) {
+  // Exit right away if we're currently paused
 
-
-  isHostCallbackScheduled = false;
-
-  if (isHostTimeoutScheduled) {
-    // We scheduled a timeout but it's no longer needed. Cancel it.
-    isHostTimeoutScheduled = false;
-    cancelHostTimeout();
+  if (enableSchedulerDebugging && isSchedulerPaused) {
+    return;
   }
 
-  isPerformingWork = true;
-  var previousPriorityLevel = currentPriorityLevel;
-
+  isExecutingCallback = true;
+  var previousDidTimeout = currentDidTimeout;
+  currentDidTimeout = didTimeout;
   try {
-    if (enableProfiling) {
-      try {
-        return workLoop(hasTimeRemaining, initialTime);
-      } catch (error) {
-        if (currentTask !== null) {
-          var currentTime = exports.unstable_now();
-          markTaskErrored(currentTask, currentTime);
-          currentTask.isQueued = false;
+    if (didTimeout) {
+      // Flush all the expired callbacks without yielding.
+      while (firstCallbackNode !== null && !(enableSchedulerDebugging && isSchedulerPaused)) {
+        // TODO Wrap in feature flag
+        // Read the current time. Flush all the callbacks that expire at or
+        // earlier than that time. Then read the current time again and repeat.
+        // This optimizes for as few performance.now calls as possible.
+        var currentTime = exports.unstable_now();
+        if (firstCallbackNode.expirationTime <= currentTime) {
+          do {
+            flushFirstCallback();
+          } while (firstCallbackNode !== null && firstCallbackNode.expirationTime <= currentTime && !(enableSchedulerDebugging && isSchedulerPaused));
+          continue;
         }
-
-        throw error;
+        break;
       }
     } else {
-      // No catch in prod codepath.
-      return workLoop(hasTimeRemaining, initialTime);
+      // Keep flushing callbacks until we run out of time in the frame.
+      if (firstCallbackNode !== null) {
+        do {
+          if (enableSchedulerDebugging && isSchedulerPaused) {
+            break;
+          }
+          flushFirstCallback();
+        } while (firstCallbackNode !== null && !shouldYieldToHost());
+      }
     }
   } finally {
-    currentTask = null;
-    currentPriorityLevel = previousPriorityLevel;
-    isPerformingWork = false;
-
-    if (enableProfiling) {
-      var _currentTime = exports.unstable_now();
-
-      markSchedulerSuspended(_currentTime);
-    }
-  }
-}
-
-function workLoop(hasTimeRemaining, initialTime) {
-  var currentTime = initialTime;
-  advanceTimers(currentTime);
-  currentTask = peek(taskQueue);
-
-  while (currentTask !== null && !(enableSchedulerDebugging && isSchedulerPaused)) {
-    if (currentTask.expirationTime > currentTime && (!hasTimeRemaining || shouldYieldToHost())) {
-      // This currentTask hasn't expired, and we've reached the deadline.
-      break;
-    }
-
-    var callback = currentTask.callback;
-
-    if (callback !== null) {
-      currentTask.callback = null;
-      currentPriorityLevel = currentTask.priorityLevel;
-      var didUserCallbackTimeout = currentTask.expirationTime <= currentTime;
-      markTaskRun(currentTask, currentTime);
-      var continuationCallback = callback(didUserCallbackTimeout);
-      currentTime = exports.unstable_now();
-
-      if (typeof continuationCallback === 'function') {
-        currentTask.callback = continuationCallback;
-        markTaskYield(currentTask, currentTime);
-      } else {
-        if (enableProfiling) {
-          markTaskCompleted(currentTask, currentTime);
-          currentTask.isQueued = false;
-        }
-
-        if (currentTask === peek(taskQueue)) {
-          pop(taskQueue);
-        }
-      }
-
-      advanceTimers(currentTime);
+    isExecutingCallback = false;
+    currentDidTimeout = previousDidTimeout;
+    if (firstCallbackNode !== null) {
+      // There's still work remaining. Request another callback.
+      ensureHostCallbackIsScheduled();
     } else {
-      pop(taskQueue);
+      isHostCallbackScheduled = false;
     }
-
-    currentTask = peek(taskQueue);
-  } // Return whether there's additional work
-
-
-  if (currentTask !== null) {
-    return true;
-  } else {
-    var firstTimer = peek(timerQueue);
-
-    if (firstTimer !== null) {
-      requestHostTimeout(handleTimeout, firstTimer.startTime - currentTime);
-    }
-
-    return false;
+    // Before exiting, flush all the immediate work that was scheduled.
+    flushImmediateWork();
   }
 }
 
@@ -68952,24 +68509,28 @@ function unstable_runWithPriority(priorityLevel, eventHandler) {
     case LowPriority:
     case IdlePriority:
       break;
-
     default:
       priorityLevel = NormalPriority;
   }
 
   var previousPriorityLevel = currentPriorityLevel;
+  var previousEventStartTime = currentEventStartTime;
   currentPriorityLevel = priorityLevel;
+  currentEventStartTime = exports.unstable_now();
 
   try {
     return eventHandler();
   } finally {
     currentPriorityLevel = previousPriorityLevel;
+    currentEventStartTime = previousEventStartTime;
+
+    // Before exiting, flush all the immediate work that was scheduled.
+    flushImmediateWork();
   }
 }
 
 function unstable_next(eventHandler) {
-  var priorityLevel;
-
+  var priorityLevel = void 0;
   switch (currentPriorityLevel) {
     case ImmediatePriority:
     case UserBlockingPriority:
@@ -68977,7 +68538,6 @@ function unstable_next(eventHandler) {
       // Shift down to normal priority
       priorityLevel = NormalPriority;
       break;
-
     default:
       // Anything lower than normal priority should remain at the current level.
       priorityLevel = currentPriorityLevel;
@@ -68985,12 +68545,18 @@ function unstable_next(eventHandler) {
   }
 
   var previousPriorityLevel = currentPriorityLevel;
+  var previousEventStartTime = currentEventStartTime;
   currentPriorityLevel = priorityLevel;
+  currentEventStartTime = exports.unstable_now();
 
   try {
     return eventHandler();
   } finally {
     currentPriorityLevel = previousPriorityLevel;
+    currentEventStartTime = previousEventStartTime;
+
+    // Before exiting, flush all the immediate work that was scheduled.
+    flushImmediateWork();
   }
 }
 
@@ -68999,105 +68565,91 @@ function unstable_wrapCallback(callback) {
   return function () {
     // This is a fork of runWithPriority, inlined for performance.
     var previousPriorityLevel = currentPriorityLevel;
+    var previousEventStartTime = currentEventStartTime;
     currentPriorityLevel = parentPriorityLevel;
+    currentEventStartTime = exports.unstable_now();
 
     try {
       return callback.apply(this, arguments);
     } finally {
       currentPriorityLevel = previousPriorityLevel;
+      currentEventStartTime = previousEventStartTime;
+      flushImmediateWork();
     }
   };
 }
 
-function timeoutForPriorityLevel(priorityLevel) {
-  switch (priorityLevel) {
-    case ImmediatePriority:
-      return IMMEDIATE_PRIORITY_TIMEOUT;
+function unstable_scheduleCallback(callback, deprecated_options) {
+  var startTime = currentEventStartTime !== -1 ? currentEventStartTime : exports.unstable_now();
 
-    case UserBlockingPriority:
-      return USER_BLOCKING_PRIORITY;
-
-    case IdlePriority:
-      return IDLE_PRIORITY;
-
-    case LowPriority:
-      return LOW_PRIORITY_TIMEOUT;
-
-    case NormalPriority:
-    default:
-      return NORMAL_PRIORITY_TIMEOUT;
-  }
-}
-
-function unstable_scheduleCallback(priorityLevel, callback, options) {
-  var currentTime = exports.unstable_now();
-  var startTime;
-  var timeout;
-
-  if (typeof options === 'object' && options !== null) {
-    var delay = options.delay;
-
-    if (typeof delay === 'number' && delay > 0) {
-      startTime = currentTime + delay;
-    } else {
-      startTime = currentTime;
-    }
-
-    timeout = typeof options.timeout === 'number' ? options.timeout : timeoutForPriorityLevel(priorityLevel);
+  var expirationTime;
+  if (typeof deprecated_options === 'object' && deprecated_options !== null && typeof deprecated_options.timeout === 'number') {
+    // FIXME: Remove this branch once we lift expiration times out of React.
+    expirationTime = startTime + deprecated_options.timeout;
   } else {
-    timeout = timeoutForPriorityLevel(priorityLevel);
-    startTime = currentTime;
+    switch (currentPriorityLevel) {
+      case ImmediatePriority:
+        expirationTime = startTime + IMMEDIATE_PRIORITY_TIMEOUT;
+        break;
+      case UserBlockingPriority:
+        expirationTime = startTime + USER_BLOCKING_PRIORITY;
+        break;
+      case IdlePriority:
+        expirationTime = startTime + IDLE_PRIORITY;
+        break;
+      case LowPriority:
+        expirationTime = startTime + LOW_PRIORITY_TIMEOUT;
+        break;
+      case NormalPriority:
+      default:
+        expirationTime = startTime + NORMAL_PRIORITY_TIMEOUT;
+    }
   }
 
-  var expirationTime = startTime + timeout;
-  var newTask = {
-    id: taskIdCounter++,
+  var newNode = {
     callback: callback,
-    priorityLevel: priorityLevel,
-    startTime: startTime,
+    priorityLevel: currentPriorityLevel,
     expirationTime: expirationTime,
-    sortIndex: -1
+    next: null,
+    previous: null
   };
 
-  if (enableProfiling) {
-    newTask.isQueued = false;
-  }
-
-  if (startTime > currentTime) {
-    // This is a delayed task.
-    newTask.sortIndex = startTime;
-    push(timerQueue, newTask);
-
-    if (peek(taskQueue) === null && newTask === peek(timerQueue)) {
-      // All tasks are delayed, and this is the task with the earliest delay.
-      if (isHostTimeoutScheduled) {
-        // Cancel an existing timeout.
-        cancelHostTimeout();
-      } else {
-        isHostTimeoutScheduled = true;
-      } // Schedule a timeout.
-
-
-      requestHostTimeout(handleTimeout, startTime - currentTime);
-    }
+  // Insert the new callback into the list, ordered first by expiration, then
+  // by insertion. So the new callback is inserted any other callback with
+  // equal expiration.
+  if (firstCallbackNode === null) {
+    // This is the first callback in the list.
+    firstCallbackNode = newNode.next = newNode.previous = newNode;
+    ensureHostCallbackIsScheduled();
   } else {
-    newTask.sortIndex = expirationTime;
-    push(taskQueue, newTask);
+    var next = null;
+    var node = firstCallbackNode;
+    do {
+      if (node.expirationTime > expirationTime) {
+        // The new callback expires before this one.
+        next = node;
+        break;
+      }
+      node = node.next;
+    } while (node !== firstCallbackNode);
 
-    if (enableProfiling) {
-      markTaskStart(newTask, currentTime);
-      newTask.isQueued = true;
-    } // Schedule a host callback, if needed. If we're already performing work,
-    // wait until the next time we yield.
-
-
-    if (!isHostCallbackScheduled && !isPerformingWork) {
-      isHostCallbackScheduled = true;
-      requestHostCallback(flushWork);
+    if (next === null) {
+      // No callback with a later expiration was found, which means the new
+      // callback has the latest expiration in the list.
+      next = firstCallbackNode;
+    } else if (next === firstCallbackNode) {
+      // The new callback has the earliest expiration in the entire list.
+      firstCallbackNode = newNode;
+      ensureHostCallbackIsScheduled();
     }
+
+    var previous = next.previous;
+    previous.next = next.previous = newNode;
+    newNode.next = next;
+    newNode.previous = previous;
   }
 
-  return newTask;
+  return newNode;
 }
 
 function unstable_pauseExecution() {
@@ -69106,30 +68658,36 @@ function unstable_pauseExecution() {
 
 function unstable_continueExecution() {
   isSchedulerPaused = false;
-
-  if (!isHostCallbackScheduled && !isPerformingWork) {
-    isHostCallbackScheduled = true;
-    requestHostCallback(flushWork);
+  if (firstCallbackNode !== null) {
+    ensureHostCallbackIsScheduled();
   }
 }
 
 function unstable_getFirstCallbackNode() {
-  return peek(taskQueue);
+  return firstCallbackNode;
 }
 
-function unstable_cancelCallback(task) {
-  if (enableProfiling) {
-    if (task.isQueued) {
-      var currentTime = exports.unstable_now();
-      markTaskCanceled(task, currentTime);
-      task.isQueued = false;
+function unstable_cancelCallback(callbackNode) {
+  var next = callbackNode.next;
+  if (next === null) {
+    // Already cancelled.
+    return;
+  }
+
+  if (next === callbackNode) {
+    // This is the only scheduled callback. Clear the list.
+    firstCallbackNode = null;
+  } else {
+    // Remove the callback from its position in the list.
+    if (callbackNode === firstCallbackNode) {
+      firstCallbackNode = next;
     }
-  } // Null out the callback to indicate the task has been canceled. (Can't
-  // remove from the queue because you can't remove arbitrary nodes from an
-  // array based heap, only the first one.)
+    var previous = callbackNode.previous;
+    previous.next = next;
+    next.previous = previous;
+  }
 
-
-  task.callback = null;
+  callbackNode.next = callbackNode.previous = null;
 }
 
 function unstable_getCurrentPriorityLevel() {
@@ -69137,18 +68695,257 @@ function unstable_getCurrentPriorityLevel() {
 }
 
 function unstable_shouldYield() {
-  var currentTime = exports.unstable_now();
-  advanceTimers(currentTime);
-  var firstTask = peek(taskQueue);
-  return firstTask !== currentTask && currentTask !== null && firstTask !== null && firstTask.callback !== null && firstTask.startTime <= currentTime && firstTask.expirationTime < currentTask.expirationTime || shouldYieldToHost();
+  return !currentDidTimeout && (firstCallbackNode !== null && firstCallbackNode.expirationTime < currentExpirationTime || shouldYieldToHost());
 }
 
-var unstable_requestPaint = requestPaint;
-var unstable_Profiling = enableProfiling ? {
-  startLoggingProfilingEvents: startLoggingProfilingEvents,
-  stopLoggingProfilingEvents: stopLoggingProfilingEvents,
-  sharedProfilingBuffer: sharedProfilingBuffer
-} : null;
+// The remaining code is essentially a polyfill for requestIdleCallback. It
+// works by scheduling a requestAnimationFrame, storing the time for the start
+// of the frame, then scheduling a postMessage which gets scheduled after paint.
+// Within the postMessage handler do as much work as possible until time + frame
+// rate. By separating the idle call into a separate event tick we ensure that
+// layout, paint and other browser work is counted against the available time.
+// The frame rate is dynamically adjusted.
+
+// We capture a local reference to any global, in case it gets polyfilled after
+// this module is initially evaluated. We want to be using a
+// consistent implementation.
+var localDate = Date;
+
+// This initialization code may run even on server environments if a component
+// just imports ReactDOM (e.g. for findDOMNode). Some environments might not
+// have setTimeout or clearTimeout. However, we always expect them to be defined
+// on the client. https://github.com/facebook/react/pull/13088
+var localSetTimeout = typeof setTimeout === 'function' ? setTimeout : undefined;
+var localClearTimeout = typeof clearTimeout === 'function' ? clearTimeout : undefined;
+
+// We don't expect either of these to necessarily be defined, but we will error
+// later if they are missing on the client.
+var localRequestAnimationFrame = typeof requestAnimationFrame === 'function' ? requestAnimationFrame : undefined;
+var localCancelAnimationFrame = typeof cancelAnimationFrame === 'function' ? cancelAnimationFrame : undefined;
+
+// requestAnimationFrame does not run when the tab is in the background. If
+// we're backgrounded we prefer for that work to happen so that the page
+// continues to load in the background. So we also schedule a 'setTimeout' as
+// a fallback.
+// TODO: Need a better heuristic for backgrounded work.
+var ANIMATION_FRAME_TIMEOUT = 100;
+var rAFID;
+var rAFTimeoutID;
+var requestAnimationFrameWithTimeout = function (callback) {
+  // schedule rAF and also a setTimeout
+  rAFID = localRequestAnimationFrame(function (timestamp) {
+    // cancel the setTimeout
+    localClearTimeout(rAFTimeoutID);
+    callback(timestamp);
+  });
+  rAFTimeoutID = localSetTimeout(function () {
+    // cancel the requestAnimationFrame
+    localCancelAnimationFrame(rAFID);
+    callback(exports.unstable_now());
+  }, ANIMATION_FRAME_TIMEOUT);
+};
+
+if (hasNativePerformanceNow) {
+  var Performance = performance;
+  exports.unstable_now = function () {
+    return Performance.now();
+  };
+} else {
+  exports.unstable_now = function () {
+    return localDate.now();
+  };
+}
+
+var requestHostCallback;
+var cancelHostCallback;
+var shouldYieldToHost;
+
+var globalValue = null;
+if (typeof window !== 'undefined') {
+  globalValue = window;
+} else if (typeof global !== 'undefined') {
+  globalValue = global;
+}
+
+if (globalValue && globalValue._schedMock) {
+  // Dynamic injection, only for testing purposes.
+  var globalImpl = globalValue._schedMock;
+  requestHostCallback = globalImpl[0];
+  cancelHostCallback = globalImpl[1];
+  shouldYieldToHost = globalImpl[2];
+  exports.unstable_now = globalImpl[3];
+} else if (
+// If Scheduler runs in a non-DOM environment, it falls back to a naive
+// implementation using setTimeout.
+typeof window === 'undefined' ||
+// Check if MessageChannel is supported, too.
+typeof MessageChannel !== 'function') {
+  // If this accidentally gets imported in a non-browser environment, e.g. JavaScriptCore,
+  // fallback to a naive implementation.
+  var _callback = null;
+  var _flushCallback = function (didTimeout) {
+    if (_callback !== null) {
+      try {
+        _callback(didTimeout);
+      } finally {
+        _callback = null;
+      }
+    }
+  };
+  requestHostCallback = function (cb, ms) {
+    if (_callback !== null) {
+      // Protect against re-entrancy.
+      setTimeout(requestHostCallback, 0, cb);
+    } else {
+      _callback = cb;
+      setTimeout(_flushCallback, 0, false);
+    }
+  };
+  cancelHostCallback = function () {
+    _callback = null;
+  };
+  shouldYieldToHost = function () {
+    return false;
+  };
+} else {
+  if (typeof console !== 'undefined') {
+    // TODO: Remove fb.me link
+    if (typeof localRequestAnimationFrame !== 'function') {
+      console.error("This browser doesn't support requestAnimationFrame. " + 'Make sure that you load a ' + 'polyfill in older browsers. https://fb.me/react-polyfills');
+    }
+    if (typeof localCancelAnimationFrame !== 'function') {
+      console.error("This browser doesn't support cancelAnimationFrame. " + 'Make sure that you load a ' + 'polyfill in older browsers. https://fb.me/react-polyfills');
+    }
+  }
+
+  var scheduledHostCallback = null;
+  var isMessageEventScheduled = false;
+  var timeoutTime = -1;
+
+  var isAnimationFrameScheduled = false;
+
+  var isFlushingHostCallback = false;
+
+  var frameDeadline = 0;
+  // We start out assuming that we run at 30fps but then the heuristic tracking
+  // will adjust this value to a faster fps if we get more frequent animation
+  // frames.
+  var previousFrameTime = 33;
+  var activeFrameTime = 33;
+
+  shouldYieldToHost = function () {
+    return frameDeadline <= exports.unstable_now();
+  };
+
+  // We use the postMessage trick to defer idle work until after the repaint.
+  var channel = new MessageChannel();
+  var port = channel.port2;
+  channel.port1.onmessage = function (event) {
+    isMessageEventScheduled = false;
+
+    var prevScheduledCallback = scheduledHostCallback;
+    var prevTimeoutTime = timeoutTime;
+    scheduledHostCallback = null;
+    timeoutTime = -1;
+
+    var currentTime = exports.unstable_now();
+
+    var didTimeout = false;
+    if (frameDeadline - currentTime <= 0) {
+      // There's no time left in this idle period. Check if the callback has
+      // a timeout and whether it's been exceeded.
+      if (prevTimeoutTime !== -1 && prevTimeoutTime <= currentTime) {
+        // Exceeded the timeout. Invoke the callback even though there's no
+        // time left.
+        didTimeout = true;
+      } else {
+        // No timeout.
+        if (!isAnimationFrameScheduled) {
+          // Schedule another animation callback so we retry later.
+          isAnimationFrameScheduled = true;
+          requestAnimationFrameWithTimeout(animationTick);
+        }
+        // Exit without invoking the callback.
+        scheduledHostCallback = prevScheduledCallback;
+        timeoutTime = prevTimeoutTime;
+        return;
+      }
+    }
+
+    if (prevScheduledCallback !== null) {
+      isFlushingHostCallback = true;
+      try {
+        prevScheduledCallback(didTimeout);
+      } finally {
+        isFlushingHostCallback = false;
+      }
+    }
+  };
+
+  var animationTick = function (rafTime) {
+    if (scheduledHostCallback !== null) {
+      // Eagerly schedule the next animation callback at the beginning of the
+      // frame. If the scheduler queue is not empty at the end of the frame, it
+      // will continue flushing inside that callback. If the queue *is* empty,
+      // then it will exit immediately. Posting the callback at the start of the
+      // frame ensures it's fired within the earliest possible frame. If we
+      // waited until the end of the frame to post the callback, we risk the
+      // browser skipping a frame and not firing the callback until the frame
+      // after that.
+      requestAnimationFrameWithTimeout(animationTick);
+    } else {
+      // No pending work. Exit.
+      isAnimationFrameScheduled = false;
+      return;
+    }
+
+    var nextFrameTime = rafTime - frameDeadline + activeFrameTime;
+    if (nextFrameTime < activeFrameTime && previousFrameTime < activeFrameTime) {
+      if (nextFrameTime < 8) {
+        // Defensive coding. We don't support higher frame rates than 120hz.
+        // If the calculated frame time gets lower than 8, it is probably a bug.
+        nextFrameTime = 8;
+      }
+      // If one frame goes long, then the next one can be short to catch up.
+      // If two frames are short in a row, then that's an indication that we
+      // actually have a higher frame rate than what we're currently optimizing.
+      // We adjust our heuristic dynamically accordingly. For example, if we're
+      // running on 120hz display or 90hz VR display.
+      // Take the max of the two in case one of them was an anomaly due to
+      // missed frame deadlines.
+      activeFrameTime = nextFrameTime < previousFrameTime ? previousFrameTime : nextFrameTime;
+    } else {
+      previousFrameTime = nextFrameTime;
+    }
+    frameDeadline = rafTime + activeFrameTime;
+    if (!isMessageEventScheduled) {
+      isMessageEventScheduled = true;
+      port.postMessage(undefined);
+    }
+  };
+
+  requestHostCallback = function (callback, absoluteTimeout) {
+    scheduledHostCallback = callback;
+    timeoutTime = absoluteTimeout;
+    if (isFlushingHostCallback || absoluteTimeout < 0) {
+      // Don't wait for the next frame. Continue working ASAP, in a new event.
+      port.postMessage(undefined);
+    } else if (!isAnimationFrameScheduled) {
+      // If rAF didn't already schedule one, we need to schedule a frame.
+      // TODO: If this rAF doesn't materialize because the browser throttles, we
+      // might want to still have setTimeout trigger rIC as a backup to ensure
+      // that we keep performing work.
+      isAnimationFrameScheduled = true;
+      requestAnimationFrameWithTimeout(animationTick);
+    }
+  };
+
+  cancelHostCallback = function () {
+    scheduledHostCallback = null;
+    isMessageEventScheduled = false;
+    timeoutTime = -1;
+  };
+}
 
 exports.unstable_ImmediatePriority = ImmediatePriority;
 exports.unstable_UserBlockingPriority = UserBlockingPriority;
@@ -69162,14 +68959,13 @@ exports.unstable_cancelCallback = unstable_cancelCallback;
 exports.unstable_wrapCallback = unstable_wrapCallback;
 exports.unstable_getCurrentPriorityLevel = unstable_getCurrentPriorityLevel;
 exports.unstable_shouldYield = unstable_shouldYield;
-exports.unstable_requestPaint = unstable_requestPaint;
 exports.unstable_continueExecution = unstable_continueExecution;
 exports.unstable_pauseExecution = unstable_pauseExecution;
 exports.unstable_getFirstCallbackNode = unstable_getFirstCallbackNode;
-exports.unstable_Profiling = unstable_Profiling;
   })();
 }
 
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 
@@ -71905,6 +71701,8 @@ __webpack_require__(/*! ./containers/Surface/Surface2 */ "./resources/js/contain
 
 __webpack_require__(/*! ./containers/OurGroup/AppBrain */ "./resources/js/containers/OurGroup/AppBrain.js");
 
+__webpack_require__(/*! ./containers/Home/Home */ "./resources/js/containers/Home/Home.js");
+
 /***/ }),
 
 /***/ "./resources/js/bootstrap.js":
@@ -71952,6 +71750,165 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 /***/ }),
 
+/***/ "./resources/js/containers/Home/Friend.js":
+/*!************************************************!*\
+  !*** ./resources/js/containers/Home/Friend.js ***!
+  \************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
+function _templateObject() {
+  var data = _taggedTemplateLiteral(["\n    height: auto;\n    width: 20%;\n    background-image: url(/images/logo", ".png);\n    background-size: contain;\n    background-repeat: no-repeat;\n    background-position: center;\n    order:", ";\n    "]);
+
+  _templateObject = function _templateObject() {
+    return data;
+  };
+
+  return data;
+}
+
+function _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(0); } return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+
+
+var Friend = react__WEBPACK_IMPORTED_MODULE_0___default.a.memo(function (props) {
+  var MainWrapper = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject(), props.friend.name, props.order + 1);
+  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, null);
+});
+/* harmony default export */ __webpack_exports__["default"] = (Friend);
+
+/***/ }),
+
+/***/ "./resources/js/containers/Home/Home.js":
+/*!**********************************************!*\
+  !*** ./resources/js/containers/Home/Home.js ***!
+  \**********************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-dom */ "./node_modules/react-dom/index.js");
+/* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react_dom__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
+/* harmony import */ var _Friend__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Friend */ "./resources/js/containers/Home/Friend.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _templateObject2() {
+  var data = _taggedTemplateLiteral(["\n        height: auto;\n        width: 220px;\n        background-color: #242249;\n        color: white;\n        font-size: 20px;\n        order: 5;\n        "]);
+
+  _templateObject2 = function _templateObject2() {
+    return data;
+  };
+
+  return data;
+}
+
+function _templateObject() {
+  var data = _taggedTemplateLiteral(["\n            height: 100vh;\n            width: 100%;\n            background-color: #08071c;\n            overflow: hidden;\n            display: flex;\n            flex-wrap: wrap;\n            justify-content: space-around;\n\n        "]);
+
+  _templateObject = function _templateObject() {
+    return data;
+  };
+
+  return data;
+}
+
+function _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(0); } return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+
+
+
+
+
+var Home =
+/*#__PURE__*/
+function (_Component) {
+  _inherits(Home, _Component);
+
+  function Home(props) {
+    var _this;
+
+    _classCallCheck(this, Home);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Home).call(this, props));
+    _this.state = {
+      friendsNames: [{
+        name: "GitHub"
+      }, {
+        name: "Laravel"
+      }, {
+        name: "React"
+      }, {
+        name: "Php"
+      }, {
+        name: "JavaScript"
+      }, {
+        name: "MySql"
+      }, {
+        name: "Udemy"
+      }, {
+        name: "Treehouse"
+      }, {
+        name: "Google"
+      }, {
+        name: "CSS"
+      }, {
+        name: "HTML"
+      }]
+    };
+    return _this;
+  }
+
+  _createClass(Home, [{
+    key: "render",
+    value: function render() {
+      var Wrapper = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div(_templateObject());
+      var Welcome = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div(_templateObject2());
+      return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Wrapper, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Welcome, null, "WELCOME PLEASE MEET MY FRIENDS"), this.state.friendsNames.map(function (friend, index) {
+        return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Friend__WEBPACK_IMPORTED_MODULE_3__["default"], {
+          key: index,
+          order: index,
+          friend: friend
+        });
+      }));
+    }
+  }]);
+
+  return Home;
+}(react__WEBPACK_IMPORTED_MODULE_0__["Component"]);
+
+/* harmony default export */ __webpack_exports__["default"] = (Home);
+
+if (document.getElementById("Home")) {
+  react_dom__WEBPACK_IMPORTED_MODULE_1___default.a.render(react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Home, null), document.getElementById("Home"));
+}
+
+/***/ }),
+
 /***/ "./resources/js/containers/OurGroup/AppBody.js":
 /*!*****************************************************!*\
   !*** ./resources/js/containers/OurGroup/AppBody.js ***!
@@ -71975,7 +71932,7 @@ __webpack_require__.r(__webpack_exports__);
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _templateObject3() {
-  var data = _taggedTemplateLiteral(["\n        height:80%;\n        width: 1280px;\n        position: relative;\n        display: flex;\n        flex-direction: row;\n        left: -380px;\n    "]);
+  var data = _taggedTemplateLiteral(["\n        height:80%;\n        width:280%;\n        position: relative;\n        display: flex;\n        flex-direction: row;\n        transform: translateX(", "%);\n    "]);
 
   _templateObject3 = function _templateObject3() {
     return data;
@@ -72045,6 +72002,7 @@ function (_Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(AppBody).call(this, props));
     _this.state = {
+      middleSectionMoveValue: -32,
       themeActive: 0,
       theme: [{
         colorOne: '#000000',
@@ -72070,6 +72028,13 @@ function (_Component) {
   }
 
   _createClass(AppBody, [{
+    key: "moveSection",
+    value: function moveSection(moveValue) {
+      this.setState({
+        middleSectionMoveValue: moveValue
+      });
+    }
+  }, {
     key: "changeTheme",
     value: function changeTheme(themeNumber) {
       this.setState({
@@ -72083,7 +72048,7 @@ function (_Component) {
 
       var MainWrapper = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject());
       var TopSection = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject2());
-      var MiddleSection = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject3());
+      var MiddleSection = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject3(), this.state.middleSectionMoveValue);
       return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_components_TopMenu__WEBPACK_IMPORTED_MODULE_8__["default"], {
         theme: this.state.theme[this.state.themeActive]
       })), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(TopSection, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_components_Logo__WEBPACK_IMPORTED_MODULE_2__["default"], {
@@ -72096,10 +72061,16 @@ function (_Component) {
           return _this2.changeTheme(themeNumber);
         }
       })), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MiddleSection, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_components_LeftMenu__WEBPACK_IMPORTED_MODULE_6__["default"], {
+        moveSection: function moveSection(moveValue) {
+          return _this2.moveSection(moveValue);
+        },
         theme: this.state.theme[this.state.themeActive]
       }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_components_Screen__WEBPACK_IMPORTED_MODULE_5__["default"], {
         theme: this.state.theme[this.state.themeActive]
       }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_components_RightMenu__WEBPACK_IMPORTED_MODULE_7__["default"], {
+        moveSection: function moveSection(moveValue) {
+          return _this2.moveSection(moveValue);
+        },
         theme: this.state.theme[this.state.themeActive]
       })), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_components_BottomMenu__WEBPACK_IMPORTED_MODULE_9__["default"], {
         theme: this.state.theme[this.state.themeActive]
@@ -72197,7 +72168,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
 function _templateObject() {
-  var data = _taggedTemplateLiteral(["\n        height: 400px;\n        width: 90%;\n        background-color: ", ";\n        border: 4px ridge ", ";\n        color:", ";\n        margin: auto auto;\n        text-align: center;\n    "]);
+  var data = _taggedTemplateLiteral(["\n        height: 400px;\n        width: 100%;\n        background-color: ", ";\n        border: 4px ridge ", ";\n        color:", ";\n        margin: auto auto;\n        text-align: center;\n        transform: ", "\n    "]);
 
   _templateObject = function _templateObject() {
     return data;
@@ -72208,14 +72179,31 @@ function _templateObject() {
 
 function _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(0); } return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 
-var BottomMenu = function BottomMenu(props) {
-  var MainWrapper = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject(), props.theme.colorOne, props.theme.colorTwo, props.theme.colorFive);
-  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, null, "Bottom");
-};
+var BottomMenu = react__WEBPACK_IMPORTED_MODULE_0___default.a.memo(function (props) {
+  var _useState = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])({
+    active: true
+  }),
+      _useState2 = _slicedToArray(_useState, 2),
+      setComponentStatus = _useState2[0],
+      newComponentStatus = _useState2[1];
 
+  var MainWrapper = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject(), props.theme.colorThree, props.theme.colorTwo, props.theme.colorFive, !setComponentStatus ? 'translateY(-100%);' : 'translateY(0);');
+  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, {
+    onClick: function onClick() {
+      return newComponentStatus(!setComponentStatus);
+    }
+  }, "Bottom");
+});
 /* harmony default export */ __webpack_exports__["default"] = (BottomMenu);
 
 /***/ }),
@@ -72327,8 +72315,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
+function _templateObject2() {
+  var data = _taggedTemplateLiteral(["\n        width: 15%;\n        height: 100%;\n        background-color: ", ";\n        margin-left: auto;\n    "]);
+
+  _templateObject2 = function _templateObject2() {
+    return data;
+  };
+
+  return data;
+}
+
 function _templateObject() {
-  var data = _taggedTemplateLiteral(["\n        height: 400px;\n        width: 400px;\n        background-color: ", ";\n        border: 4px ridge ", ";\n        color:", ";\n        margin: auto auto;\n        text-align: center;\n        transform: ", "\n    "]);
+  var data = _taggedTemplateLiteral(["\n        height: 400px\n        width: 36%;\n        background-color: ", ";\n        border: 4px ridge ", ";\n        color:", ";\n        margin: auto auto;\n        text-align: center;\n        display: flex;\n    "]);
 
   _templateObject = function _templateObject() {
     return data;
@@ -72342,26 +72340,17 @@ function _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(
 
 
 var LeftMenu = react__WEBPACK_IMPORTED_MODULE_0___default.a.memo(function (props) {
-  var initialState = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])({
-    active: true
-  });
-  var active = false;
-  var MainWrapper = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject(), props.theme.colorThree, props.theme.colorTwo, props.theme.colorFive, initialState[0].active ? 'translateX(425px);' : 'translateX(0);');
-
-  function toggle() {
-    active = true;
-    console.log("clicked");
-    initialState[1]({
-      active: !initialState[0].active
-    });
-    console.log(initialState);
-  }
-
-  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, {
+  var MainWrapper = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject(), props.theme.colorThree, props.theme.colorTwo, props.theme.colorFive);
+  var Click = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject2(), props.theme.colorFour);
+  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
     onClick: function onClick() {
-      return toggle();
+      return props.moveSection(-32);
     }
-  }, "LeftMenu");
+  }, "LeftMenu"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Click, {
+    onClick: function onClick() {
+      return props.moveSection(0);
+    }
+  }));
 });
 /* harmony default export */ __webpack_exports__["default"] = (LeftMenu);
 
@@ -72415,8 +72404,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
+function _templateObject2() {
+  var data = _taggedTemplateLiteral(["\n    width: 15%;\n    height: 100%;\n    background-color: ", ";\n    "]);
+
+  _templateObject2 = function _templateObject2() {
+    return data;
+  };
+
+  return data;
+}
+
 function _templateObject() {
-  var data = _taggedTemplateLiteral(["\n        height: 400px;\n        width: 400px;\n        background-color: ", ";\n        border: 4px ridge ", ";\n        color:", ";\n        margin: auto auto;\n        text-align: center;\n        \n    "]);
+  var data = _taggedTemplateLiteral(["\n        height: 400px;\n        width: 36%;\n        background-color: ", ";\n        border: 4px ridge ", ";\n        color:", ";\n        margin: auto auto;\n        text-align: center;\n        display: flex;\n        \n    "]);
 
   _templateObject = function _templateObject() {
     return data;
@@ -72429,12 +72428,19 @@ function _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(
 
 
 
-
-var RightMenu = function RightMenu(props) {
-  var MainWrapper = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject(), props.theme.colorOne, props.theme.colorTwo, props.theme.colorFive);
-  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, null, "RightMenu");
-};
-
+var RightMenu = react__WEBPACK_IMPORTED_MODULE_0___default.a.memo(function (props) {
+  var MainWrapper = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject(), props.theme.colorThree, props.theme.colorTwo, props.theme.colorFive);
+  var Click = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject2(), props.theme.colorFour);
+  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Click, {
+    onClick: function onClick() {
+      return props.moveSection(-64);
+    }
+  }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+    onClick: function onClick() {
+      return props.moveSection(-32);
+    }
+  }, "RightMenu"));
+});
 /* harmony default export */ __webpack_exports__["default"] = (RightMenu);
 
 /***/ }),
@@ -72452,7 +72458,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
 function _templateObject() {
-  var data = _taggedTemplateLiteral(["\n        height: 400px;\n        width: 400px;\n        background-color: ", ";\n        border: 4px ridge ", ";\n        color:", ";\n        margin: auto auto;\n        text-align: center;\n    "]);
+  var data = _taggedTemplateLiteral(["\n        height: 400px;\n        width: 30%;\n        background-color: ", ";\n        border: 4px ridge ", ";\n        color: ", ";\n        margin: auto auto;\n        text-align: center;\n    "]);
 
   _templateObject = function _templateObject() {
     return data;
@@ -72465,12 +72471,14 @@ function _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(
 
 
 
-
-var Screen = function Screen(props) {
+var Screen = react__WEBPACK_IMPORTED_MODULE_0___default.a.memo(function (props) {
   var MainWrapper = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject(), props.theme.colorOne, props.theme.colorTwo, props.theme.colorFive);
-  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, null, "Screen");
-};
-
+  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, {
+    onClick: function onClick() {
+      return newComponentStatus(!setComponentStatus);
+    }
+  }, "> Screen");
+});
 /* harmony default export */ __webpack_exports__["default"] = (Screen);
 
 /***/ }),
@@ -72488,7 +72496,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
 function _templateObject() {
-  var data = _taggedTemplateLiteral(["\n    display:none;\n        height: 400px;\n        width: 400px;\n        background-color: ", ";\n        border: 4px ridge ", ";\n        color:", ";\n        margin: auto auto;\n        text-align: center;\n        position:relative;\n        top: -380px;\n        margin-bottom: -380px;\n    "]);
+  var data = _taggedTemplateLiteral(["\n        height: 400px;\n        width: 100%;\n        background-color: ", ";\n        border: 4px ridge ", ";\n        color:", ";\n        margin: auto auto;\n        text-align: center;\n        position:relative;\n        top: -380px;\n        margin-bottom: -380px;\n        text-align: bottom;\n        transform: ", "\n    "]);
 
   _templateObject = function _templateObject() {
     return data;
@@ -72499,14 +72507,31 @@ function _templateObject() {
 
 function _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(0); } return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 
-var TopMenu = function TopMenu(props) {
-  var MainWrapper = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject(), props.theme.colorOne, props.theme.colorTwo, props.theme.colorFive);
-  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, null, "TopMenu");
-};
+var TopMenu = react__WEBPACK_IMPORTED_MODULE_0___default.a.memo(function (props) {
+  var _useState = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])({
+    active: true
+  }),
+      _useState2 = _slicedToArray(_useState, 2),
+      setComponentStatus = _useState2[0],
+      newComponentStatus = _useState2[1];
 
+  var MainWrapper = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject(), props.theme.colorThree, props.theme.colorTwo, props.theme.colorFive, !setComponentStatus ? 'translateY(100%);' : 'translateY(0);');
+  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, {
+    onClick: function onClick() {
+      return newComponentStatus(!setComponentStatus);
+    }
+  }, "TopMenu");
+});
 /* harmony default export */ __webpack_exports__["default"] = (TopMenu);
 
 /***/ }),
@@ -72745,8 +72770,8 @@ function Surface2() {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\Users\Danbass\websites\dcs\resources\js\app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! C:\Users\Danbass\websites\dcs\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\Danbass666\WebSites\dcs\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\Danbass666\WebSites\dcs\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

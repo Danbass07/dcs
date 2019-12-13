@@ -14,6 +14,7 @@ class AppBody extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            middleSectionMoveValue: -32,
             themeActive: 0,
             theme: [
                 {
@@ -36,12 +37,17 @@ class AppBody extends Component {
                     colorThree: '#938E94',
                     colorFour: '#B0A295',
                     colorFive: '#FFFFFF',
-                }
+                },
+                
             ]
         }
     }
 
-
+    moveSection(moveValue) {
+        this.setState({
+            middleSectionMoveValue: moveValue
+        })
+    }
 
     changeTheme(themeNumber) {
         this.setState({
@@ -68,11 +74,11 @@ class AppBody extends Component {
     `;
         const MiddleSection = styled.div`
         height:80%;
-        width: 1280px;
+        width:280%;
         position: relative;
         display: flex;
         flex-direction: row;
-        left: -380px;
+        transform: translateX(${this.state.middleSectionMoveValue}%);
     `;
 
         return (
@@ -92,9 +98,13 @@ class AppBody extends Component {
                 </TopSection>
 
                 <MiddleSection>
-                    <LeftMenu theme={this.state.theme[this.state.themeActive]} />
+                    <LeftMenu 
+                    moveSection={(moveValue) => this.moveSection(moveValue)}
+                    theme={this.state.theme[this.state.themeActive]} />
                     <Screen theme={this.state.theme[this.state.themeActive]}></Screen>
-                    <RightMenu theme={this.state.theme[this.state.themeActive]} />
+                    <RightMenu 
+                    moveSection={(moveValue) => this.moveSection(moveValue)}
+                    theme={this.state.theme[this.state.themeActive]} />
 
                 </MiddleSection>
 

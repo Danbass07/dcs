@@ -2,31 +2,28 @@ import React, { useState } from "react";
 import styled from "styled-components";
 
 const LeftMenu = React.memo(props => {
-    const initialState = useState({
-        active: true, 
-    })
-    let active = false
-    let MainWrapper = styled.div`
-        height: 400px;
-        width: 400px;
+    const MainWrapper = styled.div`
+        height: 400px
+        width: 36%;
         background-color: ${props.theme.colorThree};
         border: 4px ridge ${props.theme.colorTwo};
         color:${props.theme.colorFive};
         margin: auto auto;
         text-align: center;
-        transform: ${initialState[0].active  ? 'translateX(425px);' : 'translateX(0);'}
+        display: flex;
     `;
-    function toggle() {
-      active = true;
-       console.log("clicked");
-       initialState[1]({active: !initialState[0].active,});
-       console.log(initialState);
-    }
-    
-    return <MainWrapper
-    onClick={() => toggle()}>
-       LeftMenu
-    </MainWrapper>;
+    const Click = styled.div`
+        width: 15%;
+        height: 100%;
+        background-color: ${props.theme.colorFour};
+        margin-left: auto;
+    `;
+    return (
+        <MainWrapper>
+            <div onClick={() => props.moveSection(-32)}>LeftMenu</div>
+            <Click onClick={() => props.moveSection(0)} />
+        </MainWrapper>
+    );
 });
 
 export default LeftMenu;
