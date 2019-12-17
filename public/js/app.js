@@ -71762,8 +71762,28 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
+function _templateObject3() {
+  var data = _taggedTemplateLiteral(["\n        height: ", ";\n        width:  ", ";\n        background-image: url(/images/logo", ".png);\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center;\n        order: ", ";\n        transition: transform 300ms ease-in-out;\n        animation: ", " 7s 1;\n        &:hover {\n          transform: rotate(20deg)\n        }\n    "]);
+
+  _templateObject3 = function _templateObject3() {
+    return data;
+  };
+
+  return data;
+}
+
+function _templateObject2() {
+  var data = _taggedTemplateLiteral(["\n    0% {\n      height: ", ";\n      width:  ", ";\n    }\n    100% {\n      height: 0;\n      width: 0;\n    }\n    "]);
+
+  _templateObject2 = function _templateObject2() {
+    return data;
+  };
+
+  return data;
+}
+
 function _templateObject() {
-  var data = _taggedTemplateLiteral(["\n    height: auto;\n    width: 20%;\n    background-image: url(/images/logo", ".png);\n    background-size: contain;\n    background-repeat: no-repeat;\n    background-position: center;\n    order:", ";\n    "]);
+  var data = _taggedTemplateLiteral(["\n    0% {\n    \n    }\n    100% {\n     \n    }\n    "]);
 
   _templateObject = function _templateObject() {
     return data;
@@ -71777,8 +71797,18 @@ function _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(
 
 
 var Friend = react__WEBPACK_IMPORTED_MODULE_0___default.a.memo(function (props) {
-  var MainWrapper = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject(), props.friend.name, props.order + 1);
-  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, null);
+  var keyFrameExampleOne = Object(styled_components__WEBPACK_IMPORTED_MODULE_1__["keyframes"])(_templateObject());
+
+  if (props.animation) {
+    keyFrameExampleOne = Object(styled_components__WEBPACK_IMPORTED_MODULE_1__["keyframes"])(_templateObject2(), props.height, props.width);
+  }
+
+  var MainWrapper = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject3(), props.height, props.width, props.friend.name, props.order, keyFrameExampleOne);
+  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, {
+    onClick: function onClick() {
+      return props.togglePopUp();
+    }
+  }));
 });
 /* harmony default export */ __webpack_exports__["default"] = (Friend);
 
@@ -71801,8 +71831,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Friend__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Friend */ "./resources/js/containers/Home/Friend.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function _templateObject3() {
+  var data = _taggedTemplateLiteral(["\n            height:20%;\n            color: white;\n            background-color: #242249;\n          align-content: center;\n            font-size: 26px;\n        "]);
+
+  _templateObject3 = function _templateObject3() {
+    return data;
+  };
+
+  return data;
+}
+
 function _templateObject2() {
-  var data = _taggedTemplateLiteral(["\n        height: auto;\n        width: 220px;\n        background-color: #242249;\n        color: white;\n        font-size: 20px;\n        order: 5;\n        "]);
+  var data = _taggedTemplateLiteral(["\n            height: auto;\n            width: 220px;\n            background-color: #242249;\n            color: white;\n            font-size: 20px;\n            order: 5;\n        "]);
 
   _templateObject2 = function _templateObject2() {
     return data;
@@ -71812,7 +71852,7 @@ function _templateObject2() {
 }
 
 function _templateObject() {
-  var data = _taggedTemplateLiteral(["\n            height: 100vh;\n            width: 100%;\n            background-color: #08071c;\n            overflow: hidden;\n            display: flex;\n            flex-wrap: wrap;\n            justify-content: space-around;\n\n        "]);
+  var data = _taggedTemplateLiteral(["\n            height: 100vh;\n            width: 100%;\n            background-color: #08071c;\n            overflow: hidden;\n            display: flex;\n            flex-wrap: wrap;\n            flex-direction: ", "\n            justify-content: space-around;\n        "]);
 
   _templateObject = function _templateObject() {
     return data;
@@ -71856,44 +71896,107 @@ function (_Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Home).call(this, props));
     _this.state = {
-      friendsNames: [{
-        name: "GitHub"
+      animation: false,
+      popup: {
+        active: false,
+        index: 0
+      },
+      friends: [{
+        name: "GitHub",
+        description: "Lets me working with different machines on same code," + " keep my code safe," + " uploadnig changes to the server is easy as one line."
       }, {
-        name: "Laravel"
+        name: "Laravel",
+        description: "Amazing framework, its my fundament, all heavy lifting done" + " security, routing, email, querrys " + " I can start any project quickly with all important up to date modules ready to go"
       }, {
-        name: "React"
+        name: "React",
+        description: "Class and functional components all you need with easy syntax," + " its fast it has state and javascript with no limits," + " I study react over a year now and every day I discover new possibilities."
       }, {
-        name: "Php"
+        name: "Php",
+        description: "All amazing stuff Laravel do for me is possible thanks to Php," + " I can use it to achievie all I need in a back end with all objects and classes from frmework" + " even with most simple functions I can do almost enything."
       }, {
-        name: "JavaScript"
+        name: "JavaScript",
+        description: "I study Javascript almost 3 years for me its a main tool for all logic in my apps" + " manipulating data crafting DOM elements " + ""
       }, {
-        name: "MySql"
+        name: "MySql",
+        description: "Lets me working with different machines on same code," + " keep my code safe," + " uploadnig changes to the server is easy as one line."
+      },, {
+        name: "Udemy",
+        description: "When I now what I need to learn I go there" + "Best Courses you can imagine" + " www.udemy.com"
       }, {
-        name: "Udemy"
+        name: "Treehouse",
+        description: "My first steps, before I new what I want to learn and sign up there" + " one of my best decisions in life" + " been with them over 2 years and as soon I have more time I'dlove to go back."
       }, {
-        name: "Treehouse"
+        name: "Google",
+        description: "If you stuck if you really do not know how or where what you do?" + " do google.com" + " all of my friends on this web page been found thanks to Google."
       }, {
-        name: "Google"
+        name: "CSS",
+        description: "For styling I use SaSS or styled components" + " but all styling and up there and we love it"
       }, {
-        name: "CSS"
-      }, {
-        name: "HTML"
+        name: "HTML",
+        description: "What I can say. First Hello World and thats it you are officially in Love" + " I CAN DO STUFF :),"
       }]
     };
     return _this;
   }
 
   _createClass(Home, [{
+    key: "togglePopUp",
+    value: function togglePopUp(index) {
+      console.log("trigger");
+      this.setState({
+        animation: !this.state.animation
+      });
+      setTimeout(function () {
+        console.log("retrigger");
+        this.setState({
+          popup: {
+            active: !this.state.popup.active,
+            index: index
+          }
+        });
+      }.bind(this), 3000);
+    }
+  }, {
+    key: "componentDidMount",
+    value: function componentDidMount() {// fetch('https://portfoilio-a38ec.firebaseio.com/users.json', {
+      //     method: 'POST',
+      //     body:JSON.stringify(this.state),
+      //     headers: {'Content-Type': 'application/json'}
+      // });
+    }
+  }, {
     key: "render",
     value: function render() {
-      var Wrapper = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div(_templateObject());
+      var _this2 = this;
+
+      console.log(this.state);
+      var Wrapper = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div(_templateObject(), !this.state.popup.active ? 'row' : 'column-reverse');
       var Welcome = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div(_templateObject2());
-      return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Wrapper, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Welcome, null, "WELCOME PLEASE MEET MY FRIENDS"), this.state.friendsNames.map(function (friend, index) {
+      var PopUp = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div(_templateObject3());
+      return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Wrapper, null, this.state.popup.active ? react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(PopUp, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        style: {
+          margin: 'auto auto'
+        }
+      }, this.state.friends[this.state.popup.index].description)) : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Welcome, null, "Welcome in my enviroment. Hover or Touch my Friends Logo to find out what I do or did thanks to them."), !this.state.popup.active ? this.state.friends.map(function (friend, index) {
         return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Friend__WEBPACK_IMPORTED_MODULE_3__["default"], {
+          height: 'auto',
+          width: '20%',
           key: index,
           order: index,
-          friend: friend
+          friend: friend,
+          togglePopUp: function togglePopUp() {
+            return _this2.togglePopUp(index);
+          },
+          animation: _this2.state.animation
         });
+      }) : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Friend__WEBPACK_IMPORTED_MODULE_3__["default"], {
+        height: '500px',
+        width: '20%',
+        order: 1,
+        friend: this.state.friends[this.state.popup.index],
+        togglePopUp: function togglePopUp() {
+          return _this2.togglePopUp(0);
+        }
       }));
     }
   }]);

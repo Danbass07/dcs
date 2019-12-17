@@ -11363,3 +11363,12 @@ a.text-dark:focus {
   overflow: hidden;
 }
 
+.navbar {
+  background-color: #08071c;
+  color: white;
+}
+
+.top-link {
+  color: white;
+}
+
