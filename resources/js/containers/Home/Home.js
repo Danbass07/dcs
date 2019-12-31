@@ -2,11 +2,13 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 import Friend from "./Friend";
+import Slider from "./Slider"
 
 class Home extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            clicked: false,
             animation: false,
             popup: {
                 active: false,
@@ -55,7 +57,6 @@ class Home extends Component {
                         " keep my code safe," +
                         " uploadnig changes to the server is easy as one line."
                 },
-                ,
                 {
                     name: "Udemy",
                     description:
@@ -93,23 +94,71 @@ class Home extends Component {
         };
     }
 
-
     togglePopUp(index) {
-        console.log("trigger");
-        this.setState({
-   
-            animation: !this.state.animation,
-        });
+        if (!this.state.clicked) {
+            this.setState({
+                animation: !this.state.animation,
+                clicked: true
+            });
 
-        setTimeout(function(){
-            console.log("retrigger");
-        this.setState({
-            popup: {
-                active: !this.state.popup.active,
-                index: index,
-            },
-        });
-    }.bind(this), 3000);
+            setTimeout(
+                function() {
+                    this.setState({
+                        popup: {
+                            active: !this.state.popup.active,
+                            index: index
+                        },
+                        clicked: false
+                    });
+                }.bind(this),
+                3000
+            );
+        }
+    }
+    changeSlide(value) {
+        console.log(this.state.friends.length-1)
+        if (!this.state.clicked) {
+            if (value <= 0) {
+                this.setState({
+                    ...this.state,
+                    popup: {
+                        active: true,
+                        index: this.state.friends.length-1,
+                    },
+                    clicked: true
+                    
+                });
+            } else if (value >= this.state.friends.length-1) {
+                this.setState({
+                    ...this.state,
+                    popup: {
+                        active: true,
+                        index: 0,
+                    },
+                    clicked: true
+                })
+            } else {
+                this.setState({
+                    ...this.state,
+                    popup: {
+                        active: true,
+                        index: value
+                    },
+                    clicked: true
+                });
+            }
+            setTimeout(
+                function() {
+                    this.setState({
+                        animation: false,
+                        clicked: false
+                    });
+                }.bind(this),
+                4000
+            );
+        }
+    
+        
     }
     componentDidMount() {
         // fetch('https://portfoilio-a38ec.firebaseio.com/users.json', {
@@ -119,7 +168,6 @@ class Home extends Component {
         // });
     }
     render() {
-        console.log(this.state);
         const Wrapper = styled.div`
             height: 100vh;
             width: 100%;
@@ -127,7 +175,9 @@ class Home extends Component {
             overflow: hidden;
             display: flex;
             flex-wrap: wrap;
-            flex-direction: ${!this.state.popup.active ? 'row' : 'column-reverse'}
+            flex-direction: ${
+                !this.state.popup.active ? "row" : "column-reverse"
+            }
             justify-content: space-around;
         `;
 
@@ -141,10 +191,10 @@ class Home extends Component {
         `;
 
         const PopUp = styled.div`
-            height:20%;
+            height: 20%;
             color: white;
             background-color: #242249;
-          align-content: center;
+            align-content: center;
             font-size: 26px;
         `;
 
@@ -152,35 +202,66 @@ class Home extends Component {
             <Wrapper>
                 {this.state.popup.active ? (
                     <PopUp>
-                     <div style={{margin: 'auto auto'}}>
-                     {this.state.friends[this.state.popup.index].description} 
-                         </div>
+                        <div style={{ margin: "auto auto" }}>
+                            {
+                                this.state.friends[this.state.popup.index]
+                                    .description
+                            }
+                        </div>
                     </PopUp>
-                ) :    <Welcome>
-                Welcome in my enviroment. Hover or Touch my Friends Logo to
-                find out what I do or did thanks to them.
-            </Welcome>}
+                ) : (
+                    <Welcome>
+                        Welcome in my enviroment. Hover or Touch my Friends Logo
+                        to find out what I do or did thanks to them.
+                    </Welcome>
+                )}
 
-             
-                {!this.state.popup.active ? this.state.friends.map((friend, index) => {
-                    return (
-                        <Friend
-                        height={'auto'}
-                        width={'20%'}
-                            key={index}
-                            order={index}
-                            friend={friend}
-                            togglePopUp={() => this.togglePopUp(index)}
-                            animation={this.state.animation}
+                {!this.state.popup.active ? (
+                    this.state.friends.map((friend, index) => {
+                        return (
+                            <Friend
+                                height={"25%"}
+                                width={"25%"}
+                                key={index}
+                                order={index}
+                                friend={friend}
+                                togglePopUp={() => this.togglePopUp(index)}
+                                animation={this.state.animation}
+                            />
+                        );
+                    })
+                ) : (
+                    <React.Fragment>
+                        <Slider
+                             friend={this.state.friends[this.state.popup.index]}
+                             togglePopUp={() => this.togglePopUp(0)}
+                             animation={!this.state.animation}   
+                             changeSlide={ (value) => this.changeSlide(value)}  
+                             index={this.state.popup.index}    
+                                      
                         />
-                    );
-                }):   <Friend
-                height={'500px'}
-                width={'20%'}
-                order={1}
-                friend={this.state.friends[this.state.popup.index]}
-                togglePopUp={() => this.togglePopUp(0)}
-            /> }
+                        {/* <button
+                            onClick={() => {
+                                this.changeSlide(this.state.popup.index + 1);
+                            }}
+                        >
+                            LEFT
+                        </button>
+                        <Friend
+                            height={"500px"}
+                            width={"70%"}
+                            order={1}
+                            friend={this.state.friends[this.state.popup.index]}
+                            togglePopUp={() => this.togglePopUp(0)}
+                            animation={!this.state.animation}
+                        />
+                        <button
+                          onClick={() => {
+                            this.changeSlide(this.state.popup.index -1);
+                        }}
+                   >Right</button> */}
+                    </React.Fragment>
+                )}
             </Wrapper>
         );
     }
