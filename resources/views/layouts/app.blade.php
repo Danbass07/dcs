@@ -20,26 +20,24 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
+<div class="MainMenu"> 
 
-
-<a class="" href="{{ url('/home') }}">
-                    Home
-                </a>
-
-                <a class="" href="{{ url('/battlemind') }}">
-                    Battlemind
-                </a>
-
-
-
-
-
-
-   
-
+    <div class="Bubble"> 
+        <a  href="{{ url('/home') }}">
+            Home
+        </a>
+    </div>
+    
+    
+    <div class="Bubble">
+        <a href="{{ url('/battlemind') }}">
+            Battlemind
+        </a>
+    </div>
+</div>
         <main>
             @yield('content')
         </main>
-    </div>
+   
 </body>
 </html>

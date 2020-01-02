@@ -71864,12 +71864,6 @@ function _templateObject() {
 
 function _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(0); } return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -71927,7 +71921,7 @@ function (_Component) {
         description: "I study Javascript almost 3 years for me its a main tool for all logic in my apps" + " manipulating data crafting DOM elements " + ""
       }, {
         name: "MySql",
-        description: "Lets me working with different machines on same code," + " keep my code safe," + " uploadnig changes to the server is easy as one line."
+        description: "My favourite database," + "data in data out," + " www.mysql.com"
       }, {
         name: "Udemy",
         description: "When I now what I need to learn I go there" + "Best Courses you can imagine" + " www.udemy.com"
@@ -71970,41 +71964,29 @@ function (_Component) {
   }, {
     key: "changeSlide",
     value: function changeSlide(value) {
-      console.log(this.state.friends.length - 1);
-
       if (!this.state.clicked) {
         if (value <= 0) {
-          this.setState(_objectSpread({}, this.state, {
+          this.setState({
             popup: {
               active: true,
               index: this.state.friends.length - 1
-            },
-            clicked: true
-          }));
+            }
+          });
         } else if (value >= this.state.friends.length - 1) {
-          this.setState(_objectSpread({}, this.state, {
+          this.setState({
             popup: {
               active: true,
               index: 0
-            },
-            clicked: true
-          }));
+            }
+          });
         } else {
-          this.setState(_objectSpread({}, this.state, {
+          this.setState({
             popup: {
               active: true,
               index: value
-            },
-            clicked: true
-          }));
-        }
-
-        setTimeout(function () {
-          this.setState({
-            animation: false,
-            clicked: false
+            }
           });
-        }.bind(this), 4000);
+        }
       }
     }
   }, {
@@ -72027,7 +72009,7 @@ function (_Component) {
         style: {
           margin: "auto auto"
         }
-      }, this.state.friends[this.state.popup.index].description)) : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Welcome, null, "Welcome in my enviroment. Hover or Touch my Friends Logo to find out what I do or did thanks to them."), !this.state.popup.active ? this.state.friends.map(function (friend, index) {
+      }, this.state.friends[this.state.popup.index].description)) : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Welcome, null, "Welcome in my enviroment. Click on the logo to see details."), !this.state.popup.active ? this.state.friends.map(function (friend, index) {
         return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Friend__WEBPACK_IMPORTED_MODULE_3__["default"], {
           height: "25%",
           width: "25%",
@@ -72098,7 +72080,7 @@ function _templateObject3() {
 }
 
 function _templateObject2() {
-  var data = _taggedTemplateLiteral(["\n     0% {\n      transform: translateX(0);\n    }\n    100% {\n      transform: translateX(-80px);\n    }\n    "]);
+  var data = _taggedTemplateLiteral(["\n     0% {\n      transform: translateX(0);\n    }\n    10% {\n      transform: translateX(0);\n    }\n    100% {\n      transform: translateX(0);\n    }\n    "]);
 
   _templateObject2 = function _templateObject2() {
     return data;
@@ -72108,7 +72090,7 @@ function _templateObject2() {
 }
 
 function _templateObject() {
-  var data = _taggedTemplateLiteral(["\n    0% {\n      transform: translateX(-80px);\n    }\n    100% {\n      transform: translateX(0);\n    }\n    "]);
+  var data = _taggedTemplateLiteral(["\n    0% {\n      transform: translateX(0);\n    }\n    90% {\n      transform: translateX(0);\n    }\n    100% {\n      transform: translateX(0);\n    }\n    "]);
 
   _templateObject = function _templateObject() {
     return data;
@@ -73015,8 +72997,8 @@ function Surface2() {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\Users\Danbass666\WebSites\dcs\resources\js\app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! C:\Users\Danbass666\WebSites\dcs\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\Danbass\websites\dcs\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\Danbass\websites\dcs\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

@@ -53,9 +53,9 @@ class Home extends Component {
                 {
                     name: "MySql",
                     description:
-                        "Lets me working with different machines on same code," +
-                        " keep my code safe," +
-                        " uploadnig changes to the server is easy as one line."
+                        "My favourite database," +
+                        "data in data out," +
+                        " www.mysql.com"
                 },
                 {
                     name: "Udemy",
@@ -116,46 +116,32 @@ class Home extends Component {
         }
     }
     changeSlide(value) {
-        console.log(this.state.friends.length-1)
         if (!this.state.clicked) {
             if (value <= 0) {
                 this.setState({
-                    ...this.state,
                     popup: {
                         active: true,
                         index: this.state.friends.length-1,
                     },
-                    clicked: true
+                 
                     
                 });
             } else if (value >= this.state.friends.length-1) {
                 this.setState({
-                    ...this.state,
                     popup: {
                         active: true,
                         index: 0,
                     },
-                    clicked: true
                 })
             } else {
                 this.setState({
-                    ...this.state,
                     popup: {
                         active: true,
                         index: value
                     },
-                    clicked: true
                 });
             }
-            setTimeout(
-                function() {
-                    this.setState({
-                        animation: false,
-                        clicked: false
-                    });
-                }.bind(this),
-                4000
-            );
+           
         }
     
         
@@ -211,8 +197,7 @@ class Home extends Component {
                     </PopUp>
                 ) : (
                     <Welcome>
-                        Welcome in my enviroment. Hover or Touch my Friends Logo
-                        to find out what I do or did thanks to them.
+                        Welcome in my enviroment. Click on the logo to see details.
                     </Welcome>
                 )}
 
@@ -240,26 +225,7 @@ class Home extends Component {
                              index={this.state.popup.index}    
                                       
                         />
-                        {/* <button
-                            onClick={() => {
-                                this.changeSlide(this.state.popup.index + 1);
-                            }}
-                        >
-                            LEFT
-                        </button>
-                        <Friend
-                            height={"500px"}
-                            width={"70%"}
-                            order={1}
-                            friend={this.state.friends[this.state.popup.index]}
-                            togglePopUp={() => this.togglePopUp(0)}
-                            animation={!this.state.animation}
-                        />
-                        <button
-                          onClick={() => {
-                            this.changeSlide(this.state.popup.index -1);
-                        }}
-                   >Right</button> */}
+               
                     </React.Fragment>
                 )}
             </Wrapper>

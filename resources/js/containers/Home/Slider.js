@@ -6,7 +6,10 @@ const Slider = React.memo(props => {
   
     let keyFrameExampleOne = keyframes`
     0% {
-      transform: translateX(-80px);
+      transform: translateX(0);
+    }
+    90% {
+      transform: translateX(0);
     }
     100% {
       transform: translateX(0);
@@ -17,8 +20,11 @@ const Slider = React.memo(props => {
      0% {
       transform: translateX(0);
     }
+    10% {
+      transform: translateX(0);
+    }
     100% {
-      transform: translateX(-80px);
+      transform: translateX(0);
     }
     `
   }
