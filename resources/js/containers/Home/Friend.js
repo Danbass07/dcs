@@ -29,7 +29,7 @@ const Friend = React.memo(props => {
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
-        background-color: rgb(8, 7, 28, 0.1);
+        background-color: rgb(8, 7, 28, 0);
         border: none;
         order: ${props.order};
         margin: auto auto;

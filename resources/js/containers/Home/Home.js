@@ -155,7 +155,7 @@ class Home extends Component {
     }
     render() {
         const Wrapper = styled.div`
-            height: 100vh;
+            height: 95vh;
             width: 100%;
             background-color: #08071c;
             overflow: hidden;
@@ -165,15 +165,17 @@ class Home extends Component {
                 !this.state.popup.active ? "row" : "column-reverse"
             }
             justify-content: space-around;
+            padding-bottom: 60px;
         `;
 
         const Welcome = styled.div`
             height: auto;
             width: 220px;
-            background-color: #242249;
+            background-color: rgb(8, 7, 28, 0);
             color: white;
             font-size: 20px;
             order: 5;
+            position: absolute;
         `;
 
         const PopUp = styled.div`

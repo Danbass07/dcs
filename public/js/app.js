@@ -71763,7 +71763,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
 function _templateObject3() {
-  var data = _taggedTemplateLiteral(["\n        height: ", ";\n        width:  ", ";\n        background-image: url(/images/logo", ".png);\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center;\n        background-color: rgb(8, 7, 28, 0.1);\n        border: none;\n        order: ", ";\n        margin: auto auto;\n        transition: transform 300ms ease-in-out;\n        animation: ", " 3s 1;\n        transform: scale(0.9);\n        &:hover {\n          transform: scale(1.15);\n    "]);
+  var data = _taggedTemplateLiteral(["\n        height: ", ";\n        width:  ", ";\n        background-image: url(/images/logo", ".png);\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center;\n        background-color: rgb(8, 7, 28, 0);\n        border: none;\n        order: ", ";\n        margin: auto auto;\n        transition: transform 300ms ease-in-out;\n        animation: ", " 3s 1;\n        transform: scale(0.9);\n        &:hover {\n          transform: scale(1.15);\n    "]);
 
   _templateObject3 = function _templateObject3() {
     return data;
@@ -71843,7 +71843,7 @@ function _templateObject3() {
 }
 
 function _templateObject2() {
-  var data = _taggedTemplateLiteral(["\n            height: auto;\n            width: 220px;\n            background-color: #242249;\n            color: white;\n            font-size: 20px;\n            order: 5;\n        "]);
+  var data = _taggedTemplateLiteral(["\n            height: auto;\n            width: 220px;\n            background-color: rgb(8, 7, 28, 0);\n            color: white;\n            font-size: 20px;\n            order: 5;\n            position: absolute;\n        "]);
 
   _templateObject2 = function _templateObject2() {
     return data;
@@ -71853,7 +71853,7 @@ function _templateObject2() {
 }
 
 function _templateObject() {
-  var data = _taggedTemplateLiteral(["\n            height: 100vh;\n            width: 100%;\n            background-color: #08071c;\n            overflow: hidden;\n            display: flex;\n            flex-wrap: wrap;\n            flex-direction: ", "\n            justify-content: space-around;\n        "]);
+  var data = _taggedTemplateLiteral(["\n            height: 95vh;\n            width: 100%;\n            background-color: #08071c;\n            overflow: hidden;\n            display: flex;\n            flex-wrap: wrap;\n            flex-direction: ", "\n            justify-content: space-around;\n            padding-bottom: 60px;\n        "]);
 
   _templateObject = function _templateObject() {
     return data;
