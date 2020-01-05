@@ -71830,6 +71830,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
 /* harmony import */ var _Friend__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Friend */ "./resources/js/containers/Home/Friend.js");
 /* harmony import */ var _Slider__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./Slider */ "./resources/js/containers/Home/Slider.js");
+/* harmony import */ var _Message__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./Message */ "./resources/js/containers/Home/Message.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _templateObject3() {
@@ -71879,6 +71880,7 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
 
 
 
@@ -72009,7 +72011,7 @@ function (_Component) {
         style: {
           margin: "auto auto"
         }
-      }, this.state.friends[this.state.popup.index].description)) : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Welcome, null, "Welcome in my enviroment. Click on the logo to see details."), !this.state.popup.active ? this.state.friends.map(function (friend, index) {
+      }, this.state.friends[this.state.popup.index].description)) : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Message__WEBPACK_IMPORTED_MODULE_5__["default"], null), !this.state.popup.active ? this.state.friends.map(function (friend, index) {
         return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Friend__WEBPACK_IMPORTED_MODULE_3__["default"], {
           height: "25%",
           width: "25%",
@@ -72043,6 +72045,51 @@ function (_Component) {
 if (document.getElementById("Home")) {
   react_dom__WEBPACK_IMPORTED_MODULE_1___default.a.render(react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Home, null), document.getElementById("Home"));
 }
+
+/***/ }),
+
+/***/ "./resources/js/containers/Home/Message.js":
+/*!*************************************************!*\
+  !*** ./resources/js/containers/Home/Message.js ***!
+  \*************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
+function _templateObject2() {
+  var data = _taggedTemplateLiteral(["\n        height: 90px;\n        width: 300px;\n        position: absolute;\n        top: 25%;\n        left: 200%;\n        background-color: rgb(8, 7, 28, 0);\n        border: none;\n        animation: ", " 10s infinite;\n        x-index: 100;\n        color:  #98878f;\n        font-size:28px;\n \n    "]);
+
+  _templateObject2 = function _templateObject2() {
+    return data;
+  };
+
+  return data;
+}
+
+function _templateObject() {
+  var data = _taggedTemplateLiteral(["\n    0% {\n        left: -50%;\n    }\n    50% {\n        left: 30%;\n    }\n    80% {\n        left: 50%;\n    }\n    100% {\n        left: 100%;\n    }\n    "]);
+
+  _templateObject = function _templateObject() {
+    return data;
+  };
+
+  return data;
+}
+
+function _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(0); } return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+
+
+var Message = react__WEBPACK_IMPORTED_MODULE_0___default.a.memo(function (props) {
+  var keyFrameExampleOne = Object(styled_components__WEBPACK_IMPORTED_MODULE_1__["keyframes"])(_templateObject());
+  var MainWrapper = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].button(_templateObject2(), keyFrameExampleOne);
+  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, null, "WELCOME MESSAGE");
+});
+/* harmony default export */ __webpack_exports__["default"] = (Message);
 
 /***/ }),
 

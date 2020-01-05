@@ -34,6 +34,26 @@
         Battlemind
     </a>
 </div>
+<div class=""> 
+    <a  href="{{ url('/home') }}">
+        Home
+    </a>
+</div>
+
+
+<div class="">
+    <a href="{{ url('/battlemind') }}">
+        Battlemind
+    </a>
+</div>
+<div class=""> 
+    <a  href="{{ url('/home') }}">
+        Home
+    </a>
+</div>
+
+
+
 </div>
 <div class="MainMenu"> 
 

@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import styled from "styled-components";
 import Friend from "./Friend";
 import Slider from "./Slider"
+import Message from "./Message"
 
 class Home extends Component {
     constructor(props) {
@@ -198,9 +199,7 @@ class Home extends Component {
                         </div>
                     </PopUp>
                 ) : (
-                    <Welcome>
-                        Welcome in my enviroment. Click on the logo to see details.
-                    </Welcome>
+                    <Message/>
                 )}
 
                 {!this.state.popup.active ? (

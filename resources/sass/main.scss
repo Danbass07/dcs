@@ -1,4 +1,7 @@
-
+body{
+    min-width: 330px;
+    overflow: hidden;
+}
 .MainMenu{
     width: 100%;
     height:30px;
@@ -7,10 +10,13 @@
  background-color: #98878f;
  display: flex;
  justify-content: space-between;
+ min-width: 330px;
  
 }
 .Top{
     position: relative; 
+    justify-content: space-around;
+    padding-top: 3px;
 }
 .Bubble{
     width: 160px;
