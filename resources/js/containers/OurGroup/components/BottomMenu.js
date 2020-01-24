@@ -15,9 +15,17 @@ const BottomMenu = React.memo(props => {
         text-align: center;
         transform: ${!setComponentStatus ? 'translateY(-100%);' : 'translateY(0);'}
     `;
-    return <MainWrapper
-    onClick={() => newComponentStatus(!setComponentStatus)}>
-       Bottom
+    const Switch = styled.div`
+    height: 30px;
+    width: 100%;
+    padding-top: 3px;
+    background-color: ${props.theme.colorFive};
+    color: ${props.theme.colorThree};
+    `;
+    return <MainWrapper>
+      <Switch  onClick={() => newComponentStatus(!setComponentStatus)}> 
+      {setComponentStatus ? "Open" : "Close"}
+        </Switch>
     </MainWrapper>;
 });
 
