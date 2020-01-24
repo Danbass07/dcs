@@ -2,12 +2,14 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 import Friend from "./Friend";
-import Slider from "./Slider"
-import Message from "./Message"
+import Slider from "./Slider";
+import Message from "./Message";
+
 
 class Home extends Component {
     constructor(props) {
         super(props);
+
         this.state = {
             clicked: false,
             animation: false,
@@ -148,7 +150,7 @@ class Home extends Component {
         
     }
     componentDidMount() {
-        // fetch('https://portfoilio-a38ec.firebaseio.com/users.json', {
+       // fetch('https://portfoilio-a38ec.firebaseio.com/users.json', {
         //     method: 'POST',
         //     body:JSON.stringify(this.state),
         //     headers: {'Content-Type': 'application/json'}

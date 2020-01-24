@@ -27,6 +27,7 @@
         "sass-loader": "^7.1.0"
     },
     "dependencies": {
+        "gsap": "^3.0.4",
         "radium": "^0.26.0",
         "styled-components": "^4.4.1"
     }

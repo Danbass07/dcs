@@ -16,3 +16,4 @@ require('./containers/Surface/Surface');
 require('./containers/Surface/Surface2');
 require('./containers/OurGroup/AppBrain');
 require('./containers/Home/Home');
+require('./containers/Home/Welcome');

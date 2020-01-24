@@ -1,10 +1,7 @@
 @extends('layouts.app')
 
-
-
-                @section('content')
-        
-                <div class="title m-b-md">
-                    OUR GROUP
-                </div>
+@section('content')
+            <div class="">
+                <div id="Welcome"></div>
+            <div>
 @endsection
