@@ -15,16 +15,31 @@ const RightMenu = React.memo(props => {
         
     `;
     const Click = styled.div`
-    width: 15%;
+    width: 30px;
     height: 100%;
     background-color: ${props.theme.colorFour};
+    writing-mode: vertical-rl;
+        text-orientation: upright;
     `
     return <MainWrapper
-    >
-        <Click onClick={() => props.moveSection(-64)} />
-      <div onClick={() => props.moveSection(-32)}>
-      RightMenu
-        </div> 
+    >     {!props.moved ? (
+        <Click
+            onClick={() => {
+                props.moveSection(-64);
+            }}
+        >
+            Open
+        </Click>
+    ) : (
+        <Click
+            onClick={() => {
+                props.moveSection(-32);
+            }}
+        >
+            Close
+        </Click>
+    )}
+        <div>Riht Menu</div>
     </MainWrapper>;
 });
 

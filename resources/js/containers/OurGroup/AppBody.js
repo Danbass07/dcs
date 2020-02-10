@@ -15,6 +15,7 @@ class AppBody extends Component {
         super(props);
         this.state = {
             middleSectionMoveValue: -32,
+            moved: false,
             themeActive: 0,
             theme: [
                 {
@@ -45,7 +46,8 @@ class AppBody extends Component {
 
     moveSection(moveValue) {
         this.setState({
-            middleSectionMoveValue: moveValue
+            middleSectionMoveValue: moveValue,
+            moved: !this.state.moved
         })
     }
 
@@ -99,10 +101,12 @@ class AppBody extends Component {
 
                 <MiddleSection>
                     <LeftMenu 
+                    moved={this.state.moved}
                     moveSection={(moveValue) => this.moveSection(moveValue)}
                     theme={this.state.theme[this.state.themeActive]} />
                     <Screen theme={this.state.theme[this.state.themeActive]}></Screen>
                     <RightMenu 
+                    moved={this.state.moved}
                     moveSection={(moveValue) => this.moveSection(moveValue)}
                     theme={this.state.theme[this.state.themeActive]} />
 

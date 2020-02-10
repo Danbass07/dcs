@@ -13,15 +13,35 @@ const LeftMenu = React.memo(props => {
         display: flex;
     `;
     const Click = styled.div`
-        width: 15%;
+        width: 30px;
         height: 100%;
         background-color: ${props.theme.colorFour};
         margin-left: auto;
+        writing-mode: vertical-rl;
+        text-orientation: upright;
     `;
+
     return (
         <MainWrapper>
-            <div onClick={() => props.moveSection(-32)}>LeftMenu</div>
-            <Click onClick={() => props.moveSection(0)} />
+            <div>LeftMenu</div>
+
+            {!props.moved ? (
+                <Click
+                    onClick={() => {
+                        props.moveSection(0);
+                    }}
+                >
+                    Open
+                </Click>
+            ) : (
+                <Click
+                    onClick={() => {
+                        props.moveSection(-32);
+                    }}
+                >
+                    Close
+                </Click>
+            )}
         </MainWrapper>
     );
 });

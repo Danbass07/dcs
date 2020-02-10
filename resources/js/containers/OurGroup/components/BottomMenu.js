@@ -2,9 +2,7 @@ import React, { useState }  from "react";
 import styled from "styled-components";
 
 const BottomMenu = React.memo(props => {
-    let [setComponentStatus, newComponentStatus] = useState({
-        active: true, 
-    })
+    let [setComponentStatus, newComponentStatus] = useState(true)
     const MainWrapper = styled.div`
         height: 400px;
         width: 100%;

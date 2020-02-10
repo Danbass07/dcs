@@ -25,7 +25,7 @@ const Friend = React.memo(props => {
     const MainWrapper = styled.button`
         height: ${props.height};
         width:  ${props.width};
-        background-image: url(/images/logo${props.friend.name}.png);
+        background-image: url(http://malek.ovh/dcs/public/images/logo${props.friend.name}.png);
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;

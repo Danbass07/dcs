@@ -12,8 +12,8 @@ const Screen = React.memo(props => {
         text-align: center;
     `;
     return (
-        <MainWrapper onClick={() => newComponentStatus(!setComponentStatus)}>
-            > Screen
+        <MainWrapper >
+             Screen
         </MainWrapper>
     );
 });

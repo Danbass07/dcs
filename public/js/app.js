@@ -83787,7 +83787,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
 function _templateObject3() {
-  var data = _taggedTemplateLiteral(["\n        height: ", ";\n        width:  ", ";\n        background-image: url(/images/logo", ".png);\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center;\n        background-color: rgb(8, 7, 28, 0);\n        border: none;\n        order: ", ";\n        margin: auto auto;\n        transition: transform 300ms ease-in-out;\n        animation: ", " 3s 1;\n        transform: scale(0.9);\n        &:hover {\n          transform: scale(1.15);\n    "]);
+  var data = _taggedTemplateLiteral(["\n        height: ", ";\n        width:  ", ";\n        background-image: url(http://malek.ovh/dcs/public/images/logo", ".png);\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center;\n        background-color: rgb(8, 7, 28, 0);\n        border: none;\n        order: ", ";\n        margin: auto auto;\n        transition: transform 300ms ease-in-out;\n        animation: ", " 3s 1;\n        transform: scale(0.9);\n        &:hover {\n          transform: scale(1.15);\n    "]);
 
   _templateObject3 = function _templateObject3() {
     return data;
@@ -84375,6 +84375,7 @@ function (_Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(AppBody).call(this, props));
     _this.state = {
       middleSectionMoveValue: -32,
+      moved: false,
       themeActive: 0,
       theme: [{
         colorOne: '#000000',
@@ -84403,7 +84404,8 @@ function (_Component) {
     key: "moveSection",
     value: function moveSection(moveValue) {
       this.setState({
-        middleSectionMoveValue: moveValue
+        middleSectionMoveValue: moveValue,
+        moved: !this.state.moved
       });
     }
   }, {
@@ -84433,6 +84435,7 @@ function (_Component) {
           return _this2.changeTheme(themeNumber);
         }
       })), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MiddleSection, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_components_LeftMenu__WEBPACK_IMPORTED_MODULE_6__["default"], {
+        moved: this.state.moved,
         moveSection: function moveSection(moveValue) {
           return _this2.moveSection(moveValue);
         },
@@ -84440,6 +84443,7 @@ function (_Component) {
       }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_components_Screen__WEBPACK_IMPORTED_MODULE_5__["default"], {
         theme: this.state.theme[this.state.themeActive]
       }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_components_RightMenu__WEBPACK_IMPORTED_MODULE_7__["default"], {
+        moved: this.state.moved,
         moveSection: function moveSection(moveValue) {
           return _this2.moveSection(moveValue);
         },
@@ -84572,9 +84576,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 var BottomMenu = react__WEBPACK_IMPORTED_MODULE_0___default.a.memo(function (props) {
-  var _useState = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])({
-    active: true
-  }),
+  var _useState = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])(true),
       _useState2 = _slicedToArray(_useState, 2),
       setComponentStatus = _useState2[0],
       newComponentStatus = _useState2[1];
@@ -84699,7 +84701,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
 function _templateObject2() {
-  var data = _taggedTemplateLiteral(["\n        width: 15%;\n        height: 100%;\n        background-color: ", ";\n        margin-left: auto;\n    "]);
+  var data = _taggedTemplateLiteral(["\n        width: 30px;\n        height: 100%;\n        background-color: ", ";\n        margin-left: auto;\n        writing-mode: vertical-rl;\n        text-orientation: upright;\n    "]);
 
   _templateObject2 = function _templateObject2() {
     return data;
@@ -84725,15 +84727,15 @@ function _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(
 var LeftMenu = react__WEBPACK_IMPORTED_MODULE_0___default.a.memo(function (props) {
   var MainWrapper = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject(), props.theme.colorThree, props.theme.colorTwo, props.theme.colorFive);
   var Click = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject2(), props.theme.colorFour);
-  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, "LeftMenu"), !props.moved ? react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Click, {
     onClick: function onClick() {
-      return props.moveSection(-32);
+      props.moveSection(0);
     }
-  }, "LeftMenu"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Click, {
+  }, "Open") : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Click, {
     onClick: function onClick() {
-      return props.moveSection(0);
+      props.moveSection(-32);
     }
-  }));
+  }, "Close"));
 });
 /* harmony default export */ __webpack_exports__["default"] = (LeftMenu);
 
@@ -84788,7 +84790,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
 function _templateObject2() {
-  var data = _taggedTemplateLiteral(["\n    width: 15%;\n    height: 100%;\n    background-color: ", ";\n    "]);
+  var data = _taggedTemplateLiteral(["\n    width: 30px;\n    height: 100%;\n    background-color: ", ";\n    writing-mode: vertical-rl;\n        text-orientation: upright;\n    "]);
 
   _templateObject2 = function _templateObject2() {
     return data;
@@ -84814,15 +84816,15 @@ function _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(
 var RightMenu = react__WEBPACK_IMPORTED_MODULE_0___default.a.memo(function (props) {
   var MainWrapper = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject(), props.theme.colorThree, props.theme.colorTwo, props.theme.colorFive);
   var Click = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject2(), props.theme.colorFour);
-  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Click, {
+  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, null, "     ", !props.moved ? react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Click, {
     onClick: function onClick() {
-      return props.moveSection(-64);
+      props.moveSection(-64);
     }
-  }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+  }, "Open") : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Click, {
     onClick: function onClick() {
-      return props.moveSection(-32);
+      props.moveSection(-32);
     }
-  }, "RightMenu"));
+  }, "Close"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, "Riht Menu"));
 });
 /* harmony default export */ __webpack_exports__["default"] = (RightMenu);
 
@@ -84856,11 +84858,7 @@ function _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(
 
 var Screen = react__WEBPACK_IMPORTED_MODULE_0___default.a.memo(function (props) {
   var MainWrapper = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject(), props.theme.colorOne, props.theme.colorTwo, props.theme.colorFive);
-  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, {
-    onClick: function onClick() {
-      return newComponentStatus(!setComponentStatus);
-    }
-  }, "> Screen");
+  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, null, "Screen");
 });
 /* harmony default export */ __webpack_exports__["default"] = (Screen);
 
