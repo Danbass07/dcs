@@ -30,8 +30,8 @@
 
 
 <div class="">
-    <a href="{{ url('/battlemind') }}">
-        Battlemind
+    <a href="{{ url('/home') }}">
+    Home
     </a>
 </div>
 <div class=""> 
@@ -42,8 +42,8 @@
 
 
 <div class="">
-    <a href="{{ url('/battlemind') }}">
-        Battlemind
+    <a href="{{ url('/home') }}">
+    Home
     </a>
 </div>
 <div class=""> 
@@ -65,8 +65,8 @@
     
     
     <div class="Bubble right">
-        <a href="{{ url('/battlemind') }}">
-            Battlemind
+        <a href="{{ url('/home') }}">
+            Home
         </a>
     </div>
 </div>

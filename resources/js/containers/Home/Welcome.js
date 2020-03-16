@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import { gsap, ScrollToPlugin, Draggable, MotionPathPlugin } from "gsap/all";
 import Animation from "./Animation";
+import Home from "./Home";
 
 class Welcome extends Component {
     constructor(props) {
@@ -16,7 +17,7 @@ class Welcome extends Component {
 
         return (
             <React.Fragment>
-                <Animation 
+                <Home 
                 />
             </React.Fragment>
         );
