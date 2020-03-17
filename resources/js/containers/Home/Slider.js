@@ -45,7 +45,6 @@ const Slider = React.memo(props => {
             >
                 LEFT
             </Button>
-         
             <Friend
                togglePopUp={() => props.togglePopUp()}
                 height={"500px"}

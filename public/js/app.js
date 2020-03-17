@@ -83932,37 +83932,48 @@ function (_Component) {
       },
       friends: [{
         name: "GitHub",
-        description: "Lets me working with different machines on same code," + " keep my code safe," + " uploadnig changes to the server is easy as one line."
+        link: "github.com",
+        description: "Lets me working with different machines on same code." + " Keep my code safe," + " uploadnig changes to the server as easy as one line."
       }, {
         name: "Laravel",
-        description: "Amazing framework, its my fundament, all heavy lifting done" + " security, routing, email, querrys " + " I can start any project quickly with all important up to date modules ready to go"
+        link: "laravel.com",
+        description: "Amazing framework, its my fundament, all heavy lifting done: " + " security, routing, email, querrys." + " I can start any project quickly with all important up to date modules ready to go."
       }, {
         name: "React",
-        description: "Class and functional components all you need with easy syntax," + " its fast it has state and javascript with no limits," + " I study react over a year now and every day I discover new possibilities."
+        link: "reactjs.org",
+        description: "Class and functional components all you need with easy syntax," + " its fast it has state and I can use javascript with no limits," + " I study react over a year now and every day I discover new possibilities."
       }, {
         name: "Php",
-        description: "All amazing stuff Laravel do for me is possible thanks to Php," + " I can use it to achievie all I need in a back end with all objects and classes from frmework" + " even with most simple functions I can do almost enything."
+        link: "php.net",
+        description: "All amazing stuff Laravel do for me is possible thanks to Php," + " I can use it to achievie all I need in a backend with all objects and classes from frmework." + "Even with simplest functions I can do almost enything."
       }, {
         name: "JavaScript",
-        description: "I study Javascript almost 3 years for me its a main tool for all logic in my apps" + " manipulating data crafting DOM elements " + ""
+        link: "javascript.com",
+        description: "I study Javascript almost 3 years. For me its a main tool for all logic in my apps, " + "manipulating data crafting DOM elements." + ""
       }, {
         name: "MySql",
-        description: "My favourite database," + "data in data out," + " www.mysql.com"
+        link: "mysql.com",
+        description: "MySQL is the world's most popular open source database." + "Very powerful and fast. Thanks to Eloquent safe and easy to use." + ""
       }, {
         name: "Udemy",
-        description: "When I now what I need to learn I go there" + "Best Courses you can imagine" + " www.udemy.com"
+        link: "udemy.com",
+        description: "When I now what I need to learn I go there." + "Best courses you can imagine." + " "
       }, {
         name: "Treehouse",
+        link: "teamtreehouse.com",
         description: "My first steps, before I new what I want to learn and sign up there" + " one of my best decisions in life" + " been with them over 2 years and as soon I have more time I'dlove to go back."
       }, {
         name: "Google",
-        description: "If you stuck if you really do not know how or where what you do?" + " do google.com" + " all of my friends on this web page been found thanks to Google."
+        link: "google.com",
+        description: "If you stuck if you really do not know how or where what you do?" + " Do GOOGLe !" + " All of my friends on this web page been found thanks to Google."
       }, {
         name: "CSS",
-        description: "For styling I use SaSS or styled components" + " but all styling and up there and we love it"
+        link: "developer.mozilla.org/en-US/docs/Web/CSS",
+        description: "For styling I use SaSS or styled components" + " but all styling and up there and we love it."
       }, {
         name: "HTML",
-        description: "What I can say. First Hello World and thats it you are officially in Love" + " I CAN DO STUFF :),"
+        link: "html.com",
+        description: "What I can say. First Hello World and thats it you are officially in Love" + " I CAN DO STUFF :) "
       }]
     };
     return _this;
@@ -84035,7 +84046,9 @@ function (_Component) {
         style: {
           margin: "auto auto"
         }
-      }, this.state.friends[this.state.popup.index].description)) : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Message__WEBPACK_IMPORTED_MODULE_5__["default"], null), !this.state.popup.active ? this.state.friends.map(function (friend, index) {
+      }, this.state.friends[this.state.popup.index].description, "     ", react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
+        href: "https://" + this.state.friends[this.state.popup.index].link + ""
+      }, "Visit ", this.state.friends[this.state.popup.index].name, " website"))) : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Message__WEBPACK_IMPORTED_MODULE_5__["default"], null), !this.state.popup.active ? this.state.friends.map(function (friend, index) {
         return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Friend__WEBPACK_IMPORTED_MODULE_3__["default"], {
           height: "25%",
           width: "25%",
