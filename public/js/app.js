@@ -83787,7 +83787,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
 function _templateObject3() {
-  var data = _taggedTemplateLiteral(["\n        height: ", ";\n        width:  ", ";\n        background-image: url(http://malek.ovh/dcs/public/images/logo", ".png);\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center;\n        background-color: rgb(8, 7, 28, 0);\n        border: none;\n        order: ", ";\n        margin: auto auto;\n        transition: transform 300ms ease-in-out;\n        animation: ", " 3s 1;\n        transform: scale(0.9);\n        &:hover {\n          transform: scale(1.15);\n    "]);
+  var data = _taggedTemplateLiteral(["\n        height: ", ";\n        width:  ", ";\n        background-image: url(http://malek.ovh/dcs/public/images/logo", ".png);\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center;\n        background-color: rgb(8, 7, 28, 0);\n        border: none;\n        order: ", ";\n        margin: auto auto;\n        transition: transform 300ms ease-in-out;\n        animation: ", " 3s 1;\n        transform: scale(0.9);\n        &:hover {\n          transform: scale(1.15);\n        min-height: 20px;\n    "]);
 
   _templateObject3 = function _templateObject3() {
     return data;
@@ -83797,7 +83797,7 @@ function _templateObject3() {
 }
 
 function _templateObject2() {
-  var data = _taggedTemplateLiteral(["\n    0% {\n     \n    }\n    100% {\n      transform: scale(0.05);\n    }\n    "]);
+  var data = _taggedTemplateLiteral(["\n    0% {\n     \n    }\n    50%{\n      transform:scale", "\n    }\n    100% {\n      transform: scale(0.05);\n    }\n    "]);
 
   _templateObject2 = function _templateObject2() {
     return data;
@@ -83824,7 +83824,7 @@ var Friend = react__WEBPACK_IMPORTED_MODULE_0___default.a.memo(function (props) 
   var keyFrameExampleOne = Object(styled_components__WEBPACK_IMPORTED_MODULE_1__["keyframes"])(_templateObject());
 
   if (props.animation) {
-    keyFrameExampleOne = Object(styled_components__WEBPACK_IMPORTED_MODULE_1__["keyframes"])(_templateObject2());
+    keyFrameExampleOne = Object(styled_components__WEBPACK_IMPORTED_MODULE_1__["keyframes"])(_templateObject2(), Math.random() * (0.8 - 0.1) + 0.1);
   }
 
   var MainWrapper = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].button(_templateObject3(), props.height, props.width, props.friend.name, props.order, keyFrameExampleOne);
@@ -83857,8 +83857,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Message__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./Message */ "./resources/js/containers/Home/Message.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function _templateObject4() {
+  var data = _taggedTemplateLiteral(["\n        display: flex;\n        flex-direction: column;\n        height: 87vh;\n        "]);
+
+  _templateObject4 = function _templateObject4() {
+    return data;
+  };
+
+  return data;
+}
+
 function _templateObject3() {
-  var data = _taggedTemplateLiteral(["\n            height: 20%;\n            color: white;\n            background-color: #242249;\n            align-content: center;\n            font-size: 26px;\n        "]);
+  var data = _taggedTemplateLiteral(["\n            padding: 2%;\n            margin: auto;\n            font-size: 3.5vw;\n            color:  ", ";\n            text-align: center;\n         \n        "]);
 
   _templateObject3 = function _templateObject3() {
     return data;
@@ -83868,7 +83878,7 @@ function _templateObject3() {
 }
 
 function _templateObject2() {
-  var data = _taggedTemplateLiteral(["\n            height: auto;\n            width: 220px;\n            background-color: rgb(8, 7, 28, 0);\n            color: white;\n            font-size: 20px;\n            order: 5;\n            position: absolute;\n        "]);
+  var data = _taggedTemplateLiteral(["\n            height: 20%;\n            color: white;\n            background-color: ", ";\n            align-content: center;\n            font-size: 26px;\n        "]);
 
   _templateObject2 = function _templateObject2() {
     return data;
@@ -83878,7 +83888,7 @@ function _templateObject2() {
 }
 
 function _templateObject() {
-  var data = _taggedTemplateLiteral(["\n            height: 95vh;\n            width: 100%;\n            background-color: #08071c;\n            overflow: hidden;\n            display: flex;\n            flex-wrap: wrap;\n            flex-direction: ", "\n            justify-content: space-around;\n            padding-bottom: 60px;\n        "]);
+  var data = _taggedTemplateLiteral(["\n            height: 95vh;\n            min-height:200px;\n            width: 100%;\n            background-color: ", ";\n            overflow: hidden;\n            display: flex;\n            flex-wrap: wrap;\n            flex-direction: ", "\n            justify-content: space-around;\n            padding-bottom: 60px;\n        "]);
 
   _templateObject = function _templateObject() {
     return data;
@@ -83930,6 +83940,32 @@ function (_Component) {
         active: false,
         index: 0
       },
+      themeActive: 0,
+      theme: [{
+        colorOne: "#08071c",
+        colorTwo: "#242249",
+        colorThree: "#A33327",
+        colorFour: "#917164",
+        colorFive: "rgb(255, 255, 255)"
+      }, {
+        colorOne: "#000000",
+        colorTwo: "#C7493A",
+        colorThree: "#A33327",
+        colorFour: "#917164",
+        colorFive: "#AD8174"
+      }, {
+        colorOne: "#7395AE",
+        colorTwo: "#5D5C61",
+        colorThree: "#938E94",
+        colorFour: "#B0A295",
+        colorFive: "#FFFFFF"
+      }, {
+        colorOne: "#7395AE",
+        colorTwo: "#5D5C61",
+        colorThree: "#938E94",
+        colorFour: "#B0A295",
+        colorFive: "#FFFFFF"
+      }],
       friends: [{
         name: "GitHub",
         link: "github.com",
@@ -84039,16 +84075,11 @@ function (_Component) {
     value: function render() {
       var _this2 = this;
 
-      var Wrapper = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div(_templateObject(), !this.state.popup.active ? "row" : "column-reverse");
-      var Welcome = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div(_templateObject2());
-      var PopUp = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div(_templateObject3());
-      return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Wrapper, null, this.state.popup.active ? react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(PopUp, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-        style: {
-          margin: "auto auto"
-        }
-      }, this.state.friends[this.state.popup.index].description, "     ", react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
-        href: "https://" + this.state.friends[this.state.popup.index].link + ""
-      }, "Visit ", this.state.friends[this.state.popup.index].name, " website"))) : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Message__WEBPACK_IMPORTED_MODULE_5__["default"], null), !this.state.popup.active ? this.state.friends.map(function (friend, index) {
+      var Wrapper = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div(_templateObject(), this.state.theme[this.state.themeActive].colorOne, !this.state.popup.active ? "row" : "column-reverse");
+      var PopUp = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div(_templateObject2(), this.state.theme[this.state.themeActive].colorOne);
+      var InfoBar = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div(_templateObject3(), this.state.theme[this.state.themeActive].colorFive);
+      var PopUpWrapper = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div(_templateObject4());
+      return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Wrapper, null, this.state.popup.active ? react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(PopUp, null) : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Message__WEBPACK_IMPORTED_MODULE_5__["default"], null), !this.state.popup.active ? this.state.friends.map(function (friend, index) {
         return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Friend__WEBPACK_IMPORTED_MODULE_3__["default"], {
           height: "25%",
           width: "25%",
@@ -84060,7 +84091,9 @@ function (_Component) {
           },
           animation: _this2.state.animation
         });
-      }) : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Slider__WEBPACK_IMPORTED_MODULE_4__["default"], {
+      }) : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(PopUpWrapper, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(InfoBar, null, this.state.friends[this.state.popup.index].description, "     ", react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
+        href: "https://" + this.state.friends[this.state.popup.index].link + ""
+      }, "Visit", " ", this.state.friends[this.state.popup.index].name, " ", "website")), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Slider__WEBPACK_IMPORTED_MODULE_4__["default"], {
         friend: this.state.friends[this.state.popup.index],
         togglePopUp: function togglePopUp() {
           return _this2.togglePopUp(0);
@@ -84070,7 +84103,7 @@ function (_Component) {
           return _this2.changeSlide(value);
         },
         index: this.state.popup.index
-      })));
+      }))));
     }
   }]);
 
@@ -84144,7 +84177,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
 /* harmony import */ var _Friend__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Friend */ "./resources/js/containers/Home/Friend.js");
 function _templateObject4() {
-  var data = _taggedTemplateLiteral(["\n    animation: ", " 5s 1;\n    "]);
+  var data = _taggedTemplateLiteral(["\n    animation: ", " 5s 1;\n    height: 100%;\n    position: relative;\n    z-index: 2;\n    "]);
 
   _templateObject4 = function _templateObject4() {
     return data;
@@ -84154,7 +84187,7 @@ function _templateObject4() {
 }
 
 function _templateObject3() {
-  var data = _taggedTemplateLiteral(["\n    display: flex;"]);
+  var data = _taggedTemplateLiteral(["\n    height:80%;\n    display: flex;"]);
 
   _templateObject3 = function _templateObject3() {
     return data;
@@ -84205,7 +84238,7 @@ var Slider = react__WEBPACK_IMPORTED_MODULE_0___default.a.memo(function (props) 
     togglePopUp: function togglePopUp() {
       return props.togglePopUp();
     },
-    height: "500px",
+    height: "100%",
     width: "70%",
     order: 0,
     friend: props.friend,

@@ -5,7 +5,6 @@ import Friend from "./Friend";
 import Slider from "./Slider";
 import Message from "./Message";
 
-
 class Home extends Component {
     constructor(props) {
         super(props);
@@ -17,6 +16,37 @@ class Home extends Component {
                 active: false,
                 index: 0
             },
+            themeActive: 0,
+            theme: [
+                {
+                    colorOne: "#08071c",
+                    colorTwo: "#242249",
+                    colorThree: "#A33327",
+                    colorFour: "#917164",
+                    colorFive: "rgb(255, 255, 255)"
+                },
+                {
+                    colorOne: "#000000",
+                    colorTwo: "#C7493A",
+                    colorThree: "#A33327",
+                    colorFour: "#917164",
+                    colorFive: "#AD8174"
+                },
+                {
+                    colorOne: "#7395AE",
+                    colorTwo: "#5D5C61",
+                    colorThree: "#938E94",
+                    colorFour: "#B0A295",
+                    colorFive: "#FFFFFF"
+                },
+                {
+                    colorOne: "#7395AE",
+                    colorTwo: "#5D5C61",
+                    colorThree: "#938E94",
+                    colorFour: "#B0A295",
+                    colorFive: "#FFFFFF"
+                }
+            ],
             friends: [
                 {
                     name: "GitHub",
@@ -135,33 +165,28 @@ class Home extends Component {
                 this.setState({
                     popup: {
                         active: true,
-                        index: this.state.friends.length-1,
-                    },
-                 
-                    
+                        index: this.state.friends.length - 1
+                    }
                 });
-            } else if (value >= this.state.friends.length-1) {
+            } else if (value >= this.state.friends.length - 1) {
                 this.setState({
                     popup: {
                         active: true,
-                        index: 0,
-                    },
-                })
+                        index: 0
+                    }
+                });
             } else {
                 this.setState({
                     popup: {
                         active: true,
                         index: value
-                    },
+                    }
                 });
             }
-           
         }
-    
-        
     }
     componentDidMount() {
-       // fetch('https://portfoilio-a38ec.firebaseio.com/users.json', {
+        // fetch('https://portfoilio-a38ec.firebaseio.com/users.json', {
         //     method: 'POST',
         //     body:JSON.stringify(this.state),
         //     headers: {'Content-Type': 'application/json'}
@@ -170,8 +195,11 @@ class Home extends Component {
     render() {
         const Wrapper = styled.div`
             height: 95vh;
+            min-height:200px;
             width: 100%;
-            background-color: #08071c;
+            background-color: ${
+                this.state.theme[this.state.themeActive].colorOne
+            };
             overflow: hidden;
             display: flex;
             flex-wrap: wrap;
@@ -182,42 +210,31 @@ class Home extends Component {
             padding-bottom: 60px;
         `;
 
-        const Welcome = styled.div`
-            height: auto;
-            width: 220px;
-            background-color: rgb(8, 7, 28, 0);
-            color: white;
-            font-size: 20px;
-            order: 5;
-            position: absolute;
-        `;
-
         const PopUp = styled.div`
             height: 20%;
             color: white;
-            background-color: #242249;
+            background-color: ${this.state.theme[this.state.themeActive]
+                .colorOne};
             align-content: center;
             font-size: 26px;
+        `;
+        const InfoBar = styled.div`
+            padding: 2%;
+            margin: auto;
+            font-size: 3.5vw;
+            color:  ${this.state.theme[this.state.themeActive].colorFive};
+            text-align: center;
+         
+        `;
+        const PopUpWrapper = styled.div`
+        display: flex;
+        flex-direction: column;
+        height: 87vh;
         `;
 
         return (
             <Wrapper>
-                {this.state.popup.active ? (
-                    <PopUp>
-                        <div style={{ margin: "auto auto" }}>
-                            {
-                                this.state.friends[this.state.popup.index]
-                                    .description
-                            }
-                            {"     "}
-                            <a href={"https://"+ this.state.friends[this.state.popup.index]
-                                    .link+""}>Visit {this.state.friends[this.state.popup.index]
-                                    .name} website</a>
-                        </div>
-                    </PopUp>
-                ) : (
-                    <Message/>
-                )}
+                {this.state.popup.active ? <PopUp></PopUp> : <Message />}
 
                 {!this.state.popup.active ? (
                     this.state.friends.map((friend, index) => {
@@ -235,15 +252,41 @@ class Home extends Component {
                     })
                 ) : (
                     <React.Fragment>
-                        <Slider
-                             friend={this.state.friends[this.state.popup.index]}
-                             togglePopUp={() => this.togglePopUp(0)}
-                             animation={!this.state.animation}   
-                             changeSlide={ (value) => this.changeSlide(value)}  
-                             index={this.state.popup.index}    
-                                      
-                        />
-               
+                        <PopUpWrapper>
+                            <InfoBar>
+                                {
+                                    this.state.friends[this.state.popup.index]
+                                        .description
+                                }
+                                {"     "}
+                                <a
+                                    href={
+                                        "https://" +
+                                        this.state.friends[
+                                            this.state.popup.index
+                                        ].link +
+                                        ""
+                                    }
+                                >
+                                    Visit{" "}
+                                    {
+                                        this.state.friends[
+                                            this.state.popup.index
+                                        ].name
+                                    }{" "}
+                                    website
+                                </a>
+                            </InfoBar>
+                            <Slider
+                                friend={
+                                    this.state.friends[this.state.popup.index]
+                                }
+                                togglePopUp={() => this.togglePopUp(0)}
+                                animation={!this.state.animation}
+                                changeSlide={value => this.changeSlide(value)}
+                                index={this.state.popup.index}
+                            />
+                        </PopUpWrapper>
                     </React.Fragment>
                 )}
             </Wrapper>

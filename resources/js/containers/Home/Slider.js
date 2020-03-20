@@ -29,11 +29,15 @@ const Slider = React.memo(props => {
     `
   }
     const MainWrapper = styled.div`
+    height:80%;
     display: flex;`;
 
 
     const Button = styled.button`
     animation: ${keyFrameExampleOne} 5s 1;
+    height: 100%;
+    position: relative;
+    z-index: 2;
     `;
     return (
         <MainWrapper >
@@ -47,7 +51,7 @@ const Slider = React.memo(props => {
             </Button>
             <Friend
                togglePopUp={() => props.togglePopUp()}
-                height={"500px"}
+                height={"100%"}
                 width={"70%"}
                 order={0}
                 friend={props.friend}

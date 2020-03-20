@@ -16,6 +16,9 @@ const Friend = React.memo(props => {
     0% {
      
     }
+    50%{
+      transform:scale${Math.random() * (0.8 - 0.1) + 0.1}
+    }
     100% {
       transform: scale(0.05);
     }
@@ -38,6 +41,7 @@ const Friend = React.memo(props => {
         transform: scale(0.9);
         &:hover {
           transform: scale(1.15);
+        min-height: 20px;
     `;
 
     return (
