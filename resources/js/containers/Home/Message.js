@@ -36,7 +36,7 @@ const Message = React.memo(props => {
 
     return (
             <MainWrapper>
-                WELCOME MESSAGE
+                WELCOME 
             </MainWrapper>
 
     );

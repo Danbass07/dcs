@@ -84158,7 +84158,7 @@ function _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(
 var Message = react__WEBPACK_IMPORTED_MODULE_0___default.a.memo(function (props) {
   var keyFrameExampleOne = Object(styled_components__WEBPACK_IMPORTED_MODULE_1__["keyframes"])(_templateObject());
   var MainWrapper = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].button(_templateObject2(), keyFrameExampleOne);
-  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, null, "WELCOME MESSAGE");
+  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, null, "WELCOME");
 });
 /* harmony default export */ __webpack_exports__["default"] = (Message);
 
