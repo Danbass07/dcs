@@ -22,7 +22,7 @@ class Home extends Component {
                     colorOne: "#08071c",
                     colorTwo: "#242249",
                     colorThree: "#A33327",
-                    colorFour: "#917164",
+                    colorFour: "#98878f",
                     colorFive: "rgb(255, 255, 255)"
                 },
                 {
@@ -224,6 +224,7 @@ class Home extends Component {
             font-size: 3.5vw;
             color:  ${this.state.theme[this.state.themeActive].colorFive};
             text-align: center;
+            border:6px solid ${this.state.theme[this.state.themeActive].colorFour}
          
         `;
         const PopUpWrapper = styled.div`
@@ -278,6 +279,7 @@ class Home extends Component {
                                 </a>
                             </InfoBar>
                             <Slider
+                            theme={this.state.theme[this.state.themeActive]}
                                 friend={
                                     this.state.friends[this.state.popup.index]
                                 }

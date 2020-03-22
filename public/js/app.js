@@ -83868,7 +83868,7 @@ function _templateObject4() {
 }
 
 function _templateObject3() {
-  var data = _taggedTemplateLiteral(["\n            padding: 2%;\n            margin: auto;\n            font-size: 3.5vw;\n            color:  ", ";\n            text-align: center;\n         \n        "]);
+  var data = _taggedTemplateLiteral(["\n            padding: 2%;\n            margin: auto;\n            font-size: 3.5vw;\n            color:  ", ";\n            text-align: center;\n            border:6px solid ", "\n         \n        "]);
 
   _templateObject3 = function _templateObject3() {
     return data;
@@ -83945,7 +83945,7 @@ function (_Component) {
         colorOne: "#08071c",
         colorTwo: "#242249",
         colorThree: "#A33327",
-        colorFour: "#917164",
+        colorFour: "#98878f",
         colorFive: "rgb(255, 255, 255)"
       }, {
         colorOne: "#000000",
@@ -84077,7 +84077,7 @@ function (_Component) {
 
       var Wrapper = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div(_templateObject(), this.state.theme[this.state.themeActive].colorOne, !this.state.popup.active ? "row" : "column-reverse");
       var PopUp = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div(_templateObject2(), this.state.theme[this.state.themeActive].colorOne);
-      var InfoBar = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div(_templateObject3(), this.state.theme[this.state.themeActive].colorFive);
+      var InfoBar = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div(_templateObject3(), this.state.theme[this.state.themeActive].colorFive, this.state.theme[this.state.themeActive].colorFour);
       var PopUpWrapper = styled_components__WEBPACK_IMPORTED_MODULE_2__["default"].div(_templateObject4());
       return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Wrapper, null, this.state.popup.active ? react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(PopUp, null) : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Message__WEBPACK_IMPORTED_MODULE_5__["default"], null), !this.state.popup.active ? this.state.friends.map(function (friend, index) {
         return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Friend__WEBPACK_IMPORTED_MODULE_3__["default"], {
@@ -84094,6 +84094,7 @@ function (_Component) {
       }) : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(PopUpWrapper, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(InfoBar, null, this.state.friends[this.state.popup.index].description, "     ", react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
         href: "https://" + this.state.friends[this.state.popup.index].link + ""
       }, "Visit", " ", this.state.friends[this.state.popup.index].name, " ", "website")), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Slider__WEBPACK_IMPORTED_MODULE_4__["default"], {
+        theme: this.state.theme[this.state.themeActive],
         friend: this.state.friends[this.state.popup.index],
         togglePopUp: function togglePopUp() {
           return _this2.togglePopUp(0);
@@ -84177,7 +84178,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! styled-components */ "./node_modules/styled-components/dist/styled-components.browser.esm.js");
 /* harmony import */ var _Friend__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Friend */ "./resources/js/containers/Home/Friend.js");
 function _templateObject4() {
-  var data = _taggedTemplateLiteral(["\n    animation: ", " 5s 1;\n    height: 100%;\n    position: relative;\n    z-index: 2;\n    "]);
+  var data = _taggedTemplateLiteral(["\n    animation: ", " 5s 1;\n    height: 105%;\n    position: relative;\n    z-index: 2;\n    background-color:", ";\n    border: 0px;\n    "]);
 
   _templateObject4 = function _templateObject4() {
     return data;
@@ -84229,7 +84230,7 @@ var Slider = react__WEBPACK_IMPORTED_MODULE_0___default.a.memo(function (props) 
   }
 
   var MainWrapper = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].div(_templateObject3());
-  var Button = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].button(_templateObject4(), keyFrameExampleOne);
+  var Button = styled_components__WEBPACK_IMPORTED_MODULE_1__["default"].button(_templateObject4(), keyFrameExampleOne, props.theme.colorFour);
   return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(MainWrapper, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Button, {
     onClick: function onClick() {
       props.changeSlide(+props.index + 1);

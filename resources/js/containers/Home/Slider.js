@@ -35,9 +35,11 @@ const Slider = React.memo(props => {
 
     const Button = styled.button`
     animation: ${keyFrameExampleOne} 5s 1;
-    height: 100%;
+    height: 105%;
     position: relative;
     z-index: 2;
+    background-color:${props.theme.colorFour};
+    border: 0px;
     `;
     return (
         <MainWrapper >
