@@ -30,46 +30,34 @@
 
 
 <div class="">
-    <a href="{{ url('/home') }}">
-    Home
+    <a 
+    target="_blank"
+    href="http://www.linkedin.com/in/daniel-malek-a7368454">
+    LinkedIn
     </a>
 </div>
 <div class=""> 
-    <a  href="{{ url('/home') }}">
-        Home
+    <a  href="https://teamtreehouse.com/danielmalek">
+        Treehouse
     </a>
 </div>
 
 
 <div class="">
-    <a href="{{ url('/home') }}">
-    Home
+    <a href="http://battlemind.malek.ovh/">
+    Battlemind
     </a>
 </div>
 <div class=""> 
-    <a  href="{{ url('/home') }}">
-        Home
+    <a  href="http://rwc.malek.ovh/">
+        Wyveren's Gaming Club
     </a>
 </div>
 
 
 
 </div>
-<div class="MainMenu"> 
 
-    <div class="Bubble"> 
-        <a  href="{{ url('/home') }}">
-            Home
-        </a>
-    </div>
-    
-    
-    <div class="Bubble right">
-        <a href="{{ url('/home') }}">
-            Home
-        </a>
-    </div>
-</div>
         <main>
             @yield('content')
         </main>

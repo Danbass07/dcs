@@ -4,6 +4,7 @@ import styled from "styled-components";
 import Friend from "./Friend";
 import Slider from "./Slider";
 import Message from "./Message";
+import BottomMenu from "./BottomMenu";
 
 class Home extends Component {
     constructor(props) {
@@ -137,6 +138,29 @@ class Home extends Component {
             ]
         };
     }
+    themeChange(value) {
+     
+       
+        if(value + this.state.themeActive > this.state.theme.length - 1) {
+        
+            this.setState({
+                themeActive: 0,
+            })
+
+        } else if (value + this.state.themeActive < 0) {
+      
+            this.setState({
+                themeActive: this.state.theme.length - 1,
+            })
+
+        } else {
+        
+            this.setState({
+                themeActive: this.state.themeActive + value,
+            })
+        }
+
+    }
 
     togglePopUp(index) {
         if (!this.state.clicked) {
@@ -159,6 +183,7 @@ class Home extends Component {
             );
         }
     }
+
     changeSlide(value) {
         if (!this.state.clicked) {
             if (value <= 0) {
@@ -186,13 +211,11 @@ class Home extends Component {
         }
     }
     componentDidMount() {
-        // fetch('https://portfoilio-a38ec.firebaseio.com/users.json', {
-        //     method: 'POST',
-        //     body:JSON.stringify(this.state),
-        //     headers: {'Content-Type': 'application/json'}
-        // });
+ 
+        
     }
     render() {
+
         const Wrapper = styled.div`
             height: 95vh;
             min-height:200px;
@@ -211,7 +234,7 @@ class Home extends Component {
         `;
 
         const PopUp = styled.div`
-            height: 20%;
+           
             color: white;
             background-color: ${this.state.theme[this.state.themeActive]
                 .colorOne};
@@ -232,10 +255,12 @@ class Home extends Component {
         flex-direction: column;
         height: 87vh;
         `;
+   
+
 
         return (
             <Wrapper>
-                {this.state.popup.active ? <PopUp></PopUp> : <Message />}
+                {this.state.popup.active ? null : <Message />}
 
                 {!this.state.popup.active ? (
                     this.state.friends.map((friend, index) => {
@@ -252,7 +277,7 @@ class Home extends Component {
                         );
                     })
                 ) : (
-                    <React.Fragment>
+                
                         <PopUpWrapper>
                             <InfoBar>
                                 {
@@ -289,8 +314,12 @@ class Home extends Component {
                                 index={this.state.popup.index}
                             />
                         </PopUpWrapper>
-                    </React.Fragment>
+               
                 )}
+                <BottomMenu 
+                    themeChange={(value) => this.themeChange(value)}
+                    theme={this.state.theme[this.state.themeActive]}
+                />
             </Wrapper>
         );
     }
